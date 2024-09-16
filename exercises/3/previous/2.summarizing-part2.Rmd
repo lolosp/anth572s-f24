@@ -1,0 +1,47 @@
+---
+title: "Summarizing across groups"
+author: "Your-name-here"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## 1. Summarizing by groups 
+
+For this, we will work with the Ache dataset again. It's available as a .csv in your working directory. Load it with the `read.csv()` function and save it as `ache`
+
+```{r}
+ache <- read.csv("ache-hunting.csv")
+```
+
+If you don't remember what the data looks like, go ahead and insert a code chunk and look at the structure of the data. 
+
+#### Q1.1.  Produce the summary statistics for `ache$age`. We're going to use these to break the ages into four roughly equal groups, so make sure to use the median and quartiles. You can compute the quartiles with `quantile()`, specifying the 0.25 and 0.75 probabilities.
+
+```{r}
+
+```
+
+#### Q1.2 Use the computed Q1, median and Q3 values, combined with `mutate()` and an `ifelse()` statement to compute a new variable called "agegroup" with the levels: 1, 2, 3, 4. Go ahead and save the resulting dataframe as `ache`.
+
+```{r}
+
+```
+
+#### Q1.3. Based on our previous knowledge of the returns from Ache hunts (assignment 1 is due soon!), we know that a lot of hunts are unsuccessful. But of the hunts that are successful, is there any difference between age groups in average meat return? Make sure to also produce standard deviations!
+Hint: Use `group_by()` and `summarise()`
+
+```{r}
+
+```
+
+#### Q1.4. Is there any difference in yield per hunt between the age groups when we exclude the hunts that are unsuccessful? Produce a plot to demonstrate the summary statistics you produced in Q1.3. Make sure to color your plot by age group and add informative labels on the title and axes.
+
+```{r}
+
+```
+

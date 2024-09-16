@@ -1,0 +1,483 @@
+---
+title: "ANOVA and Introduction to Non-Parametric Tests"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+---
+
+
+```{r, include = FALSE}
+library(tidyverse)
+library(car)
+```
+
+# Looking ahead to term project
+
+## Goal of the project
+
+:::{.incremental}
+Give you experience:
+
+- Formulating research questions and hypotheses
+- Supporting/situating these questions with literature review
+- Testing your hypotheses with statistical tests
+- Reflecting on what your statistical results mean about your question of interest
+:::
+
+## How ?
+
+You will identify a dataset (Zenodo, other data repository, or I can help you with options)
+
+You will decide on a topic and come up with two specific questions/hypotheses
+
+You will test these hypotheses, write a report outlining your results, and present your findings in a lightning talk
+
+
+## Project components 
+
+:::{.incremental}
+1. Pre-registration - 20% - due April 12th
+2. Report - 60% - due May 2nd
+3. Presentation - 20% - May 2nd
+:::
+
+## Project topic
+
+Next week, you'll be submitting a topic you're interested in working on. 
+
+. . . 
+
+<br> You should think about a topic that will serve you in your studies or your other work obligations 
+
+. . . 
+
+<br> Alongside the topic you will be asked to specify a dataset you are interested in using - You can propose several datasets if you're not set on one yet. 
+
+## Building on last week's foundations
+
+Last week, we saw tests for means of two samples - paired and unpaired
+
+Today we're going to deal with what to do in situations where we have more than two groups
+
+##
+
+::: callout-note
+## Learning objectives
+**At the end of this lesson you will:**
+
+-   Understand the basic logic of ANOVA tests
+-   Be ready to apply ANOVA in practice
+-   Start to work with non-parametric tests
+ 
+:::
+
+# Introduction to the ANOVA
+
+## Tests we've learned so far
+
+:::{.incremental}
+- z-scores for a single individual
+- z-test and t-test for a single mean 
+- paired t-test
+- independent sample t-test
+:::
+
+## ANOVA
+
+<br>
+**AN**alysis **O**f **VA**riance - extension of an independent t-test when there more than two groups being compared
+
+. . .
+
+<br>
+Allows comparison of multiple means, accounting for the variance around those means 
+
+## ANOVA
+
+<br>
+Basically, knowing what we know about variability/ dispersion of scores across all of the sample, are the means different?
+
+# Basic logic underlying ANOVA
+
+## Null hypothesis in ANOVA
+
+<br>H~0~: The populations have the same mean
+
+<br>H~1~: The populations do not have the same mean
+
+## The H~0~, $\mu$ and $\sigma$
+
+H~0~ states that the populations have the same mean, and therefore they should have the same variance
+
+. . . 
+
+<br>Therefore, if the H~0~ is true, we should expect the samples being tested to have the same mean and the same variance (with sampling error)
+
+. . . 
+
+<br>We can use this information to test H~0~ across our samples
+
+
+## Measures of variance
+
+:::{.incremental}
+Two measures of variance available to us here:
+
+- within groups variance
+- between groups variance 
+
+:::
+
+## Within group variance 
+
+This is the sum of the squared differences between each observation in the group and the group mean. These group-level sums are then summed across each of the groups.
+
+. . .
+
+This is then divided by the degrees of freedom, which is *the total number of individuals minus the number of groups*
+ 
+
+## Between group variance
+
+This is the sum of the squared differences between each group mean and the overall mean (of all groups), which are weighted by the size of each group (number of individuals). 
+
+. . .
+
+This is then divided by the degrees of freedom, which is *the number of groups minus one*
+
+
+## The F statistic 
+
+Is calculated as the between group variance divided by the within group variance 
+
+. . . 
+
+This is called the F ratio or the F statistic
+
+
+## The F statistic
+
+The F statistic has its own distribution, which is left-truncated and right skewed
+
+![](images/f-stat.png)
+
+## The F statistic
+
+It depends on two measures of degree of freedom:
+
+  - between groups: number of groups - 1
+  - within groups: total number of individuals - number of groups
+
+![](images/f-stat.png)
+
+## The F statistic under H~0~
+
+When the null hypothesis is true, the ratio of between to within group variance is 1 
+
+. . . 
+
+<br>
+The further away from one the F statistic gets, the more likely we are to reject the null hypothesis 
+
+
+## Stepping back: understanding the F statistic
+
+Think of it as a signal-to-noise ratio.
+
+. . . 
+
+Signal = between group variance; noise = within group variance 
+
+. . . 
+
+Is the variation between the samples large enough compared to the variation within them for us to pick up the signal amongst all of the noise? 
+
+# Applying the ANOVA in practice
+
+## Practical tidbits for using ANOVA 
+
+1. H~0~ / H~1~
+2. Assumptions
+3. Test and alternatives
+4. Post-hoc tests
+
+## H~0~ and H~1~ in ANOVA
+
+<br>H~0~: The populations have the same mean
+
+<br>H~1~: The populations do not have the same mean
+
+## Assumptions 
+
+:::{.incremental}
+
+ANOVA makes three assumptions (familiar to us):
+
+  1. Independence of observations
+  2. Normality of each group
+  3. Homogeneity of variances
+  
+::: 
+
+## Assumptions: Independence 
+
+<br> How to test?
+ 
+. . . 
+
+Common-sense call, no formal test 
+
+## Assumptions: Normality 
+
+<br> How to test?
+ 
+. . . 
+
+QQ plot (`car::qqPlot()`)
+Shapiro-Wilks test (`shapiro.test()`)
+
+## Assumptions: Homogeneity of Variance 
+
+<br> How to test?
+ 
+. . . 
+
+Levene's test (`car::leveneTest()`)
+
+
+## Running the test and alternatives
+
+```{r}
+plants <- PlantGrowth
+str(plants)
+unique(plants$group)
+```
+
+## Running the test and alternatives 
+
+```{r}
+ggplot(plants, aes(x = group, y = weight, fill = group))+
+  geom_boxplot()+scale_fill_viridis_d()+
+  theme_classic()
+```
+
+## Running the test and alternatives 
+
+Test runs with the function `aov()` which is base R 
+
+```{r}
+anova1 <- aov(weight ~ group, data = plants, var.equal = TRUE)
+summary(anova1)
+```
+
+## Running the test and alternatives
+
+Can run tests with samples with non-equal variances with `oneway.test()`, which runs an extension of Welch's test for > 2 samples
+
+```{r}
+anova2 <- oneway.test(weight ~ group, data = plants, var.equal = FALSE)
+anova2
+```
+
+## Post-hoc tests
+
+The ANOVA results tell you if there is a difference between the groups, but it doesn't tell you which group(s) are different 
+
+. . . 
+
+One way to find out is to plot the data via a boxplot for example
+
+. . . 
+
+If you wanted a quantification of the differences, you can run a post-hoc text that compares the distribution of each set of two groups.
+
+
+## Post-hoc tests
+
+There are mixed opinions about running a series of t-tests as post-hoc to ANOVA
+
+. . . 
+
+The main objection is multiple comparisons, which rises $\alpha$ (risk of Type 1 error) beyond our specification (usually 0.05).
+
+. . . 
+
+For example, if there are three groups, we do three comparisons, which rises $\alpha$ to  `1-(1-0.05)^3` or 0.14. 
+
+## Post-hoc tests 
+
+Instead, the recommended post-hoc test is the Tukey's "honest significance" test
+
+```{r}
+TukeyHSD(anova1)
+```
+
+## A quick note on non-homogeneity of variances
+
+There is an ANOVA alternative for non-homogenous variances which is an extension of the Welch t-test. 
+
+. . . 
+
+It's called with `oneway.test()` setting `var.equal = FALSE`
+
+. . . 
+
+It's computationally a bit annoying because the post-hoc is not built into base R so we won't deal with it here, but know it is available.
+
+
+# Your turn: Posit Cloud
+
+
+# Non-parametric alternatives
+
+## Introduction to non-parametric tests
+
+*Non-parametric* tests which make no assumptions about the distribution of the population data. 
+
+<br> Examples of these tests are: the Chi sq test, the Wilcoxon/Mann Whitney suite, and the Kruskal Wallis
+
+## Introduction to non-parametric tests
+
+These tests are also called rank-order tests because they do not use the underlying data. 
+
+<br> Rather, they use a procedure where data are ranked internally then the ranks of the data are compared between the groups of interest 
+
+## When to use non-parametric tests
+
+:::{.incremental}
+Some examples:
+
+1. When data are measures on an ordinal scale (e.g. Likert)
+2. When data are inherently ranked (e.g. the APGAR score)
+3. Skewed/outlier-prone data 
+
+:::
+
+
+## What non-parametric tests are available?
+
+<br>
+
+| Parametric test  | Non-parametric alternative  |
+|------------------|-----------------------------|
+| Paired t-test    | Wilcoxon Signed-Rank        |
+| Indep. t-test    | W. Rank-Sum/ Mann-Whitney U |
+| ANOVA            | Kruskal-Wallis H            |
+
+
+## The procedure underlying rank-order tests
+
+:::{.incremental}
+
+1. Order all values in the dataset
+2. Assign ranks from smallest to largest 
+3. Sum up the ranks in each group
+4. Compare ranks between groups 
+
+:::
+
+## Example: Asthma drug
+
+Two treatment groups take a placebo or a drug against asthma and report the number of episodes of shortness of breath they experience in the following week.
+
+![](images/mwu-example.png)
+
+## Logic behind the tests 
+
+If the groups have similar values, then the ranks should be about evenly distributed between them 
+
+. . . 
+
+In other words, the sum of the ranks should be the same across the groups 
+
+# Practical tidbits for non-parametric tests 
+
+## Null and alternate hypothesis 
+
+<br> H~0~: The two populations have equal distributions
+<br> H~1~: The two populations do not have equal distributions
+
+. . . 
+
+Note that we are not saying mean here because we are not testing for differences in means, but rather in ranks
+
+
+## Code for running the tests
+
+
+| Non-parametric test         |R function                    |
+|-----------------------------|------------------------------|
+| Wilcoxon Signed-Rank        | `wilcox.test(paired = TRUE)` |
+| W. Rank-Sum/ Mann-Whitney U | `wilcox.test(paired = FALSE)`|
+| Kruskal-Wallis H            | `kruskal.test()`             |
+
+
+## Running Mann-Whitneys 
+
+Do the two genotypes yield people with similar heights?
+
+::::{.columns}
+
+:::{.column width="40%"}
+```{r}
+gene <- read.csv("data/genotype_height.csv")
+head(gene)
+
+
+```
+:::
+
+:::{.column width="60%"}
+
+```{r}
+ggplot(gene, aes(x = height, fill = genotype))+
+  geom_histogram(binwidth = 2, col = "black")+
+  facet_grid(genotype~.)+
+  theme_classic()
+
+```
+
+:::
+
+::::
+
+## H~0~ and H~1~
+
+. . . 
+
+H~0~: Height has the same distribution across the two genotype groups
+<br>H~1~: Height does not have the same distribution across the two genotype groups
+
+. . . 
+
+<br>*Note*: Here the H~0~ refers to the distribution of the variables, not the median or the mean
+
+## Running the test 
+
+Check that the groups are not normally distributed
+
+
+
+```{r}
+shapiro.test(gene$height[gene$genotype == "genotype_B"])
+qqPlot(gene$height[gene$genotype == "genotype_B"])
+```
+
+## Running the test 
+
+Apply the function 
+
+. . . 
+
+```{r}
+wilcox.test(height ~ genotype, data = gene, paired = FALSE)
+```
+
+# Your turn: Posit
+

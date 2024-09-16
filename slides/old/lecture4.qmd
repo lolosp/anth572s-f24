@@ -1,0 +1,1241 @@
+---
+title: "Reviewing key concepts in NHST"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+---
+
+```{r, include = F}
+library(tidyverse)
+library(BSDA)
+
+```
+
+## Today's plan 
+
+1. Review of basic principles of NHST
+2. Start on comparing groups 
+
+# Revisiting z-scores
+
+## Proportion of scores within the distribution
+
+On many IQ tests, the average score is 100 and the standard deviation is 16. This means that roughly 34% of scores range between 100-116
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(36, 164)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 100, sd = 16))+
+  scale_x_continuous(breaks = seq(36, 164, 16))+ labs(x = "", y = "proportion")+
+  geom_vline(xintercept = c(100), color = "red")+
+  geom_vline(xintercept = (116), color = "red", lty = "dashed")+
+  theme_minimal()+
+  labs(title = "Distribution of IQ test scores")
+```
+
+## Proportion of scores within the distribution
+
+What percentage of the scores fall below 1 SD? In other words, what percentage of scores are less than 116? 
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(36, 164)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 100, sd = 16))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 100, sd = 16), fill = "firebrick", alpha = 0.4, xlim = c(34, 116))+
+  scale_x_continuous(breaks = seq(36, 164, 16))+ labs(x = "", y = "proportion")+
+  geom_vline(xintercept = c(100), color = "red")+
+  geom_vline(xintercept = (116), color = "red", lty = "dashed")+
+  theme_minimal()+
+  labs(title = "Distribution of IQ test scores")
+
+```
+
+## Hint:
+
+![](images/sd_coverage.png)
+
+## Z-scores and probability
+
+We can demonstrate the same result by using Z-scores and the normal distribution. 
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r}
+z <- (116-100)/16
+z
+pnorm(z)  #new function
+```
+
+:::
+
+:::{.column width="50%"}
+
+![](images/Z-score-formula.jpeg)
+
+
+:::
+
+::::
+
+## Z-scores and probability
+
+Using the same logic, we can calculate the probability of any score. For example, let's calculate the probability of Stephen Hawkins' IQ, which was reputedly 160.
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r}
+z <- (160-100)/16
+z
+pnorm(3.75)
+```
+
+:::
+
+:::{.column width="50%"}
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(36, 164)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 100, sd = 16))+
+  scale_x_continuous(breaks = seq(36, 164, 16))+ labs(x = "", y = "proportion")+
+  geom_vline(xintercept = c(100), color = "red")+
+  geom_vline(xintercept = (160), color = "red", lty = "dashed")+
+  theme_minimal()+
+  labs(title = "Distribution of IQ test scores")
+
+```
+
+::: 
+
+::::
+
+## Z-scores and probability
+
+We can also flip the question by asking, what is the probability of receiving a score higher than x?
+
+. . . 
+
+In this case, we have to remember that probabilities give the left tail -- the area to the left of the value. 
+
+. . . 
+
+Since probabilities range from 0-1 (think 0-100%), we have to subtract our result from 1 to obtain the right tail.
+
+## Z-scores and probability
+
+What is the probability of obtaining a score that is at least 110 or greater?
+
+. . . 
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r}
+z <- (110-100)/16
+z
+pnorm(z)
+1 - pnorm(z)
+```
+
+:::
+
+:::{.column width="50%"}
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(36, 164)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 100, sd = 16))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 100, sd = 16), fill = "navy", alpha = 0.4, xlim = c(110, 164))+
+  scale_x_continuous(breaks = seq(36, 164, 16))+ labs(x = "", y = "proportion")+
+  geom_vline(xintercept = c(100), color = "black")+ 
+  geom_vline(xintercept = 110, color = "black", lty = "dashed")+
+  theme_minimal()+
+  labs(title = "Distribution of IQ test scores")
+
+```
+
+:::
+
+::::
+
+## Z-scores and probability. 
+
+You can also find the probability of falling within a particular interval. For example, what is the chance of obtaining a score between 110 and 130?
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(36, 164)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 100, sd = 16))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 100, sd = 16), fill = "yellow", alpha = 0.4, xlim = c(36, 130))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 100, sd = 16), fill = "navy", alpha = 0.4, xlim = c(36, 110))+
+  geom_vline(xintercept = c(110, 130), lty = "dashed")+
+  scale_x_continuous(breaks = seq(36, 164, 16))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  labs(title = "Distribution of IQ test scores")
+
+```
+
+## Z-scores and probability. 
+
+You can substract the probability of the blue area from the probability of the yellow area to find `110 <= p <= 130`
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r}
+z1 <- (110-100)/16
+z2 <- (130-100)/16
+
+pnorm(z2)-pnorm(z1)
+```
+
+:::
+
+:::{.column width="50%"}
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(36, 164)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 100, sd = 16))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 100, sd = 16), fill = "yellow", alpha = 0.4, xlim = c(36, 130))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 100, sd = 16), fill = "navy", alpha = 0.4, xlim = c(36, 110))+
+  geom_vline(xintercept = c(110, 130), lty = "dashed")+
+  scale_x_continuous(breaks = seq(36, 164, 16))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  labs(title = "Distribution of IQ test scores")
+
+```
+
+:::
+
+::::
+
+# Samples versus populations
+
+## 
+
+Typically, the questions we have concern populations - for example, let's say we want to study the factors that affect attitudes towards vaccines in New York state residents.
+
+. . . 
+
+<br>We can't ask everyone in New York state about their opinions. 
+
+. . . 
+
+<br>Instead, we have to be happy asking *some* people in NY, and doing our best to try to ensure that the people we speak to are representative of all of NY state residents 
+
+## Population 
+
+[Population]{.fragment .highlight-red} - the entire group of people/subjects to which a researcher intends the results of their study to apply to.
+
+. . . 
+
+In our vaccine attitude example, the population would be? 
+
+## Sample 
+
+[Sample]{.fragment .highlight-red} - the particular group of people/subjects studied. These are typically taken to be representative of the larger population
+
+<br>We make *inferences* about our population based on what we learn from our sample
+
+. . . 
+
+In our vaccine attitude example, the sample would be? 
+
+## Extrapolating from the sample to the population
+
+Researchers typically do their best to try and select a random sample from their population
+
+. . . 
+
+<br> For example, if you only surveyed students in this class, you likely wouldn't get an accurate reflection of the range of attitudes towards vaccines across NY state
+
+. . . 
+
+<br> Non randomness in a sample can lead to *sampling bias*, which affects the reliability of extrapolations from the sample to the population.
+
+## Statistical terminology in samples versus populations
+
+*Population parameters* are constants (mean, variance, sd) that can only be measured by getting information from all subjects in the population. These are typically unknown
+
+. . . 
+
+*Sample statistics* are statistics (mean, variance, sd) calculated from the individuals included in your sample
+
+## Parameters versus statistics
+
+There are small differences in the equations for calculating the mean, variance, and standard deviation of parameters versus statistics. 
+
+. . . 
+
+This is something you should know, but don't worry about the equations. Statistical software takes care of this for you.
+
+# Hypothesis testing
+
+## Hypotheses in the scientific method 
+
+![](images/sci-method.png)
+
+## Hypothesis testing - an example
+
+
+::::{.columns}
+
+:::{.column width="60%"}
+
+Let's take an example - we have population of babies and we are able to follow them for several years
+
+We want to test whether a certain supplement is able to speed up development in kids - specifically, how quickly they reach the ability to walk.
+
+:::
+
+:::{.column width="40%"}
+
+![](images/Baby-Photos-Tanzania.jpeg)
+
+:::
+
+::::
+
+## Hypothesis testing - an example
+
+
+::::{.columns}
+
+:::{.column width="60%"}
+
+Let's say our population of babies that begins to walk at the age distribution $\mu$ = 14mo; $\sigma$ = 3mo. 
+
+If we supplement one baby, how early would he have to start walking to suggest that the supplements speeds up development?
+
+:::
+
+:::{.column width="40%"}
+
+![](images/Baby-Photos-Tanzania.jpeg)
+
+:::
+
+::::
+
+
+
+## Hypothesis testing - an example
+
+
+::::{.columns}
+
+:::{.column width="60%"}
+
+::: {.fragment}
+If the baby started to walk at 8 months, what is the probability of this occuring in the population? 
+:::
+
+:::{.fragment}
+We can calculate a z-score for this:
+```{r}
+(z <- (8-14)/3)
+pnorm(z)
+```
+:::
+
+:::
+
+:::{.column width="40%"}
+
+![](images/Baby-Photos-Tanzania.jpeg)
+
+:::
+
+::::
+
+## Hypothesis testing - an example
+
+
+::::{.columns}
+
+:::{.column width="60%"}
+
+If the sampled baby was typical of the non-sampled babies, there would be a 0.02 or 2% chance of the baby walking this early. This low probability is considered evidence that the baby is *not* typical of the non-sampled babies.
+:::
+
+:::{.column width="40%"}
+
+![](images/Baby-Photos-Tanzania.jpeg)
+
+:::
+
+::::
+
+## Hypothesis testing - an example
+
+
+::::{.columns}
+
+:::{.column width="60%"}
+
+::: {.fragment}
+This would lead researchers to think that it is *not likely* that the supplement has *no* effect - remember the 2% chance.
+:::
+
+:::{.fragment}
+
+Our evidence does not say anything about the chance of our supplement having an effect, only that there is a low probability that it *does not have an effect*
+
+:::
+
+:::
+
+:::{.column width="40%"}
+
+![](images/Baby-Photos-Tanzania.jpeg)
+
+:::
+
+::::
+
+
+## Hypothesis testing
+
+The core question we ask when we test a hypothesis is: 
+
+:::{.callout-important}
+
+What is the probability of observing our data if the null hypothesis is true?
+
+:::
+
+. . . 
+
+This is circuitous but it is **important to remember** that hypothesis testing can only speak to this likelihood.
+
+
+# The hypothesis testing process
+
+## The hypothesis testing process
+
+:::{.incremental}
+Steps to test a hypothesis:
+  
+  1. State the null and alternate hypotheses
+  2. Determine the characteristics of the comparison distribution
+  3. Determine the critical value
+  4. Calculate the test value
+  5. Decide whether to reject the null hypothesis
+
+:::
+
+## An example
+
+::::{.columns}
+
+:::{.column width="60%"}
+
+Let's walk through this process with the same example of the sampled babies. 
+
+Again, reference babies: $\mu$ = 14; $\sigma$ = 3
+
+Supplemented baby walks at 8 months.
+
+:::
+
+:::{.column width="40%"}
+
+![](images/Baby-Photos-Tanzania.jpeg)
+
+:::
+
+::::
+
+## 1. State the null and alternate hypotheses
+
+*Null hypothesis*: A statement that expresses that there is no difference or no relationship between the groups or variables analyzed. Implies that any difference observed is due to chance rather than a true difference.
+
+. . . 
+
+*Alternate hypothesis*: A statement that expresses the predicted difference between groups in hypothesis testing  Also called the research hypothesis.
+
+
+## 1. State the null and alternate hypotheses
+
+When we are formulating our hypotheses, it helps to start by isolating our research question. 
+
+Then, we should figure out what our groups are, and what we expect to vary between these groups.
+
+. . . 
+
+Does the supplement cause babies to walk earlier?
+
+
+## 1. State the null and alternate hypotheses
+
+<br>
+
+:::{.fragment fragment-index=2}
+<br>
+H~0~: There is no difference in age between babies who are supplemented and those who are not
+:::
+
+:::{.fragment fragment-index=1}
+<br>
+H~1~: The mean age of babies who are supplemented is lower than that of babies who are not supplemented
+:::
+
+## 2. Determine the characteristics of the comparison distribution
+
+What is the comparison population in this example?
+
+. . .
+
+The non-supplemented babies, with age of walking distributed as: 
+
+$\mu$ = 14 <br>
+$\sigma$ = 3
+
+:::{.aside}
+
+Note: we use the population notation here because we are refering to the mean and standard deviation for a known population 
+
+:::
+
+## 2. Determine the characteristics of the comparison distribution
+
+In this example, the characteristics of the comparison distribution are straightforward because they are given
+
+Note that in other example we will see later in class, this is not always trivial and does require us to have a think.
+
+## 3. Determine the critical value
+
+*Critical value*: Value of a test statistic that defines the threshold of significance in a statistical test 
+
+. . . 
+
+The critical values can also be used to calculate the bounds of a confidence interval (more on this later).
+
+
+## 3. Determine the critical value 
+
+Critical values are somewhat subjective. They are set by the researchers based on their comfort with the possibility of detecting an effect when it is not there; or the possibility of failing to detect an effect when it is in fact there.
+
+. . .
+
+The conventional level of significance is 5% or 0.05. Researchers sometimes also use 1% or 0.01. 
+
+## 3. Determine the critical value 
+
+We can determine the critical value using a critical value table, or in R using the `qnorm` function. 
+
+. . . 
+
+```{r}
+qnorm(0.05)
+qnorm(0.01)
+```
+. . . 
+
+`qnorm` is the opposite of `pnorm` which we introduced on Monday. It takes a probability and returns a z-score value.
+
+
+## 3. Determine the critical value 
+
+Let's say we want to opt to use an alpha of *p<0.05*. Our critical value for our test statistic would therefore be -1.64. 
+
+. . . 
+
+In this case our test statistic is just a Z-score, but in the future it could be z, t, F, etc.
+
+. . . 
+
+What this means is that if our test statistic is more extreme than -1.64, we consider our sample to be *statistically significantly* from our comparison distribution or population.
+
+
+## 4. Determine the test statistic
+
+In this case we're working with a z-score but this could be a z-test, t-test, Chi^2^, Fisher's exact, etc.. 
+
+. . . 
+
+```{r, results = FALSE }
+z <- (8-14)/3 # (score - mean/sd) = 2
+```
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -1.64))+
+  geom_vline(xintercept = c(-2), lty = "dashed")+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  ggtitle("Red = region for rejection of null")
+
+```
+
+## 5. Decide whether to reject the null. 
+
+Compare your test statistic (step 4) to the critical value (step 3). 
+
+. . . 
+
+If the test statistic is more extreme than the critical value, you reject the null. 
+
+. . . 
+
+If the test statistic is not more extreme than the critical value, then you fail to reject the null. 
+
+
+## How to talk about your results
+
+You can either reject the null, or fail to reject the null 
+
+. . . 
+
+It is not appropriate to say your results "prove the alternate" - you can say your results support or provide evidence for the alternate. 
+
+. . . 
+
+It is not appropriate to say your results "support the null" - you can say that the difference or the relationship is not statistically significant
+
+## When to formulate hypotheses - don't be HARKing!
+
+Hypotheses are predictions we make based on our experience or knowledge *prior* to seeing the data 
+<br>
+From a research practice perspective it is absolutely *inappropriate* to create hypotheses after examining the data.  
+<br>
+Hypothesizing After Results are Known (HARKing) - is poor scientific practice. 
+
+## When to formulate hypotheses - don't be HARKing!
+
+If unexpected results are uncovered (i.e. contradicting the alternate hypothesis), it is OK to report them as such and to explore their implications for theory
+
+
+
+## Summarizing the steps of hypothesis testing
+
+:::{.incremental}
+Steps to test a hypothesis:
+  
+  1. State the null and alternate hypotheses
+  2. Determine the characteristics of the comparison distribution
+  3. Determine the critical value
+  4. Calculate the test value
+  5. Decide whether to reject the null hypothesis
+
+:::
+
+# One tail versus two tailed examples
+
+## 
+
+
+::::{.columns}
+
+:::{.column width="60%"}
+
+In our last example, we were only interested in one direction.
+
+This was an example of a one-tailed test
+
+:::
+
+:::{.column width="40%"}
+
+![](images/Baby-Photos-Tanzania.jpeg)
+
+:::
+
+::::
+
+## One-tailed versus two-tailed tests
+
+*Directional hypothesis* - an alternate hypothesis that predicts the direction of the effect 
+
+. . . 
+
+In our baby example, we predicted that the sample age at walking for the supplemented babies would be earlier (less than) the age at walking for non-supplemented babies
+
+. . . 
+
+With a directional hypothesis, we use a one-tailed test.
+
+## Critical region in the one-tailed test
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -1.64))+
+  geom_vline(xintercept = c(-2), lty = "dashed")+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  ggtitle("Red = region for rejection of null")
+
+```
+
+## Two-tailed tests 
+
+When hypotheses do not specify the expected direction of the effect, we use a two-tailed test instead.
+
+. . . 
+
+*Non-directional hypothesis* - An alternate hypothesis that does not specify the direction of the effect 
+
+## Two-tailed tests 
+
+Imagine a scenario where we are trialing an intervention - we are implementing a team building event for this class. 
+
+. . . 
+
+Perhaps the program might increase peer support for learning in the class, increasing test scores. Or, it might lead to too much socialization and too little studying, decreasing tests scores. 
+
+## Determining critical values for two-tailed tests
+
+In two-tailed tests, the probability is split between the upper and lower tail, so that 2.5% is at the lowest end and 2.5% at the highest tail.
+
+::::{.columns}
+
+:::{.column width="50%"}
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -1.64))+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  ggtitle("Red = region for rejection of null, 5% one-tailed")
+
+```
+
+::: 
+
+:::{.column width="50%"}
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -1.96))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(1.96, 4))+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  ggtitle("Red = region for rejection of null, 5% two-tailed")
+
+```
+
+:::
+
+::::
+
+
+## Hypothesis testing - another example
+
+Let's carry through with the example of the group-building intervention for a class.  
+
+. . . 
+
+We want to know whether the intervention is going to affect test scores, but we have no clear prediction as to the the direction of the effect. 
+
+. . . 
+
+Let's take this example through the hypothesis testing process. 
+
+## 1. State the null and alternate hypotheses
+
+<br>
+
+:::{.fragment fragment-index=2}
+<br>
+H~0~: There is no difference in test scores between students who undergo the intervention and students who do not 
+:::
+
+:::{.fragment fragment-index=1}
+<br>
+H~1~: There is no difference in test scores between students who undergo the intervention and students who do not 
+:::
+
+## 2. Determine the characteristics of the comparison distribution 
+
+Let's say that the average for students who do not undergo a class is a an 85%, with a standard deviation of 3 percentage points.
+
+. . . 
+
+Pop quiz: what's the range that encompasses 95% of scores?
+
+
+## 3. Determine the critical value
+
+- Is this a one- or two-tailed test?
+- What should our significance level be?
+- How much of our distribution should be on each tail?
+
+## 3. Determine the critical value(s)
+
+```{r}
+qnorm(c(0.025, 0.975))
+
+```
+ 
+In other words, -1.96 and +1.96 
+
+## 3. Determine the critical value(s)
+
+At this point it's also very helpful to plot the critical regions:
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -1.96))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(1.96, 4))+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  ggtitle("Red = region for rejection of null, 5% two-tailed")
+
+```
+
+## 4. Calculate the test statistic
+
+Again, here we're using a z-score to simplify the procedure. In real situations we would be using more complicated statistics. 
+
+Let's say that the student who gets the intervention obtains a score of 85.
+
+```{r}
+z <- (88-85)/3
+z
+```
+
+## 5. Decide whether to reject the null
+
+H~0~: There is no difference in test scores between students who undergo the intervention and students who do not 
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -1.96))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(1.96, 4))+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  geom_vline(xintercept = z, lty = "dashed")+
+  theme_minimal()
+
+```
+
+## A few reflections on one- versus two-tailed tests
+
+You likely noticed that in a two-tailed test, the critical regions are more extreme
+ 
+. . . 
+
+That leads may lead you to ask why not use a one-tailed test all the time?
+
+
+## Balancing errors 
+
+Errors, from a statistical standpoint, are not related to calculation but rather to the choices of alpha level.
+
+. . . 
+
+When we set significance level and critical values, we set a threshold of error we are comfortable with
+
+. . . 
+
+For example, when we set alpha at 0.05 or 5% probability, there is a small chance (~5%) that we could observe the data at this critical value or a more extreme one even if the null hypothesis is true 
+
+## Type I error
+
+Type I error is when you reject the null, when in fact the null is true (false positive). 
+
+. . . 
+
+With an alpha of 0.05, 5% of the time, you may be making a Tpye I error. 
+
+. . . 
+
+The more you increase alpha (>0.05), the greater your chance of a Type I error. But the more you reduce alpha (<0.01), the less your chance of a Type I error.
+
+## Type II error
+
+Type II error is when you fail to reject the null, when in fact the null is false (false negative).
+
+. . . 
+
+When you decrease alpha to guard against Type I error, you increase your chance of a Type II error 
+
+
+## Effect, error, and power
+
+We can integrate our analyses of effect with studies of power and error to either: 
+
+  1. Understand the likelihood that we have sufficient sample size to detect an effect
+  2. Predict a sample size needed to detect a particular effect
+  
+. . . 
+
+More on this later! 
+
+# Your turn: Posit Cloud
+
+# Hypothesis testing with means of samples
+
+## The Central Limit Theorem
+
+If you have a population with mean $\mu$ and standard deviation $\sigma$, and take sufficiently large enough samples from the population, then the distribution of the sampled means will be approximately normally distributed 
+
+
+## The Central Limit Theorem
+
+1) The means of samples drawn from a population are normally distributed regardless of the shape of the population distribution 
+2) As sample size gets larger, the means of samples drawn the distribution will more closely approximate the population parameter
+
+## The CLT: Normally distributed variables
+
+Let's take a normally distributed trait with mean 75 and standard deviation 8. Let's then take samples of size n = 10, and compute their means.
+
+![](images/NormalPopulation.png)
+
+## The CLT: Normally distributed variables
+
+When we aggregate the means, we get a distribution with mean 75 and standard deviation 2.5. Note that the mean is quite close to the population mean (originally 75). 
+
+![](images/Normal_n10.png){height=250}
+
+. . . 
+
+
+We can achieve this with a sample size of 10 because the original variable was normally distributed
+
+
+## The CLT: Non-normally distributed variables
+
+This is a Poisson distribution (don't worry too much about this). Imagine it record number of babies born to a mother.
+
+![](images/PoissonPopulation.png){height=300}
+
+## The CLT: Non-normally distributed variables
+
+
+::::{.columns}
+
+:::{.column width="50"}
+If we pull 100,000 samples of size 10 from the distribution and calculate their means, we get the following:
+
+
+:::
+
+:::{.column width="50%"}
+
+![](images/Poisson_n10.png){height=300}
+
+:::
+
+::::
+
+## The CLT: Non-normally distributed variables
+
+
+::::{.columns}
+
+:::{.column width="50"}
+However, if we pull 100,000 samples of size 30 from the distribution and calculate their means, we get a much more normal looking distribution with mean= 3 and sd = 0.32
+
+
+:::
+
+:::{.column width="50%"}
+
+![](images/Poisson_n30.png){height=300}
+
+::: 
+
+::::
+
+## The CLT: a more intuitive example
+
+Imagine a coin toss example where we have a 0.50 probability of flipping a head and landing on heads is considered a success.
+
+. . . 
+
+If we flip the coin 10 times, how many successes should we expect?
+
+. . . 
+
+If we repeat this process 1,000 times, we would expect that the mean value for successful flips stabilizes around 5. 
+
+
+## Hypothesis testing with the population mean
+
+Let's say we are working in a hospital setting, and we know that over the last two years, our care providers see an average of 200 people per day. There is a standard deviation on that mean of 16 people. We then introduce a new healthcare management system (HMS) and we want to know the impact of that change on productivity. Let's also say we want to test at $\alpha$ = 0.05.
+
+We track how many people are seen in our clinic for the following two month (40 days of work). The daily average for this period is 205 people seen. Is this evidence that our new HMS is increasing productivity?
+
+## 1. State the null and alternate hypotheses
+
+<br>
+
+:::{.fragment fragment-index=2}
+<br>
+H~0~: There is no difference in productivity in the period after the introduction of the new HMS
+:::
+
+:::{.fragment fragment-index=1}
+<br>
+H~1~: There is a difference in productivity in the period after the introduction of the new HMS
+:::
+
+## 1. State the null and alternate hypotheses
+
+<br>
+
+:::{.fragment fragment-index=2}
+<br>
+H~0~: $\mu$ = 200
+:::
+
+:::{.fragment fragment-index=1}
+<br>
+H~1~: $\mu$ $\neq$ 200
+:::
+
+## 2. Determine the characteristics of the comparison distribution
+
+In this example, the characteristics of the population are straightforward: 
+
+<br>
+$\mu$ = 200<br>
+$\sigma$ = 16
+
+## 3. Determine the critical value
+
+- Is this a one- or two-tailed test?
+- What should our significance level be?
+- How much of our distribution should be on each tail?
+
+
+## 3. Determine the critical value
+
+- Is this a one- or two-tailed test? [Two]{.fragment .fade-in }
+- What should our significance level be?[$\alpha$ = 0.05]{.fragment .fade-in }
+- How much of our distribution should be on each tail?
+[$\alpha$ / 2 = 0.025]{.fragment .fade-in }
+
+
+## 3. Determine the critical value
+
+Obtain the critical value for the test statistic, then plot the critical regions
+
+```{r}
+qnorm(0.025)
+```
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -1.96))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(1.96, 4))+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  ggtitle("Red = region for rejection of null for a two tailed Z test at alpha = 0.05")
+
+```
+
+
+## 4. Determine the test statistic
+
+In this case we're going to use a z-test. 
+
+Z-tests are similar to z-scores, except they are designed to test whether a sample mean deviates from a population mean with known parameters. 
+
+. . . 
+
+<br> These are really only used when:
+
+  1. You know the population parameters
+  2. The sample is large (>30)
+  
+
+## 4. Determine the test statistic
+
+![](images/z-test-formula.png)
+
+. . . 
+
+$\sigma$ / sqrt(n) is the *standard error* which is used to quantify variability around means. Remember that the CLT states that as we draw more samples from a distribution, we obtain more precise estimates of the mean
+
+
+## 4. Determine the test statistic
+
+$\mu$ = 200
+<br>$\sigma$ = 16
+<br>$\bar{x}$ = 205
+<br>n = 40
+
+. . . 
+
+```{r}
+z <- (205 -200)/(16/sqrt(40))
+z
+```
+
+
+## 5. Decide whethe to reject the null
+ 
+```{r}
+-1.69 > z
+1.96 < z
+
+```
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -1.96))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(1.96, 4))+
+  geom_vline(xintercept = z, lty = "dashed")+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  ggtitle("Red = region for rejection of null for a two tailed Z test at alpha = 0.05")
+
+```
+
+## The effect of sample size on the test statistic
+
+Note that because sample size is included in the formula, our results are sensitive to sample size. Here is the same effect (+5), but with half the sample size.
+
+```{r}
+z <- (205 -200)/(16/sqrt(20))
+z
+```
+
+## The effect of sample size on the test statistic 
+
+What do we conclude about the null hypothesis with a test statistic of 1.40? 
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -1.96))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(1.96, 4))+
+  geom_vline(xintercept = z, lty = "dashed")+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()+
+  ggtitle("Red = region for rejection of null for a two tailed Z test at alpha = 0.05")
+
+```
+
+# Your turn: Posit Cloud
+
+
+# Introduction to the one sample t-test
+
+## 
+
+We can use the z-test, which relies on the z distribution, when we know the population standard deviation and/or have a large sample size (n>30).
+
+. . . 
+
+In many situations, our characteristics do not match these criteria
+
+
+## Student's *t* distribution
+
+Developed and publised in 1908 by William Gossett, brewmaster for Guinness at the time.
+
+. . . 
+
+He was concerned with the use of sd to estimate $\sigma$, especially for small samples
+
+## Student's *t* distribution
+
+There is not really *one* t-distribution but rather a series of them (typically given: one for each sample size given up to 30, then in increments through 100 or so). 
+
+![](images/z-versus-t.png)
+
+## Student's *t* distribution
+
+Student's t-distribution has more dispersion and is flatter than the normal. As the sample size increases, the t distribution appraoches the standard normal distribution  
+
+![](images/z-versus-t.png)
+
+
+## the t versus z (normal) distribution 
+
+At the same alpha levels, critical values for the t are greater than for the z. For example, a one tailed test at $\alpha$ = 0.05 yields the following critical test values:
+
+```{r}
+(z <- qnorm(0.05))
+(t30 <- qt(0.05, df = 30))
+(t10 <- qt(0.05, df = 10))
+```
+
+## the t versus z (normal) distribution
+
+:::{.incremental}
+Because the critical values for the t distribution are greater than for the z:
+
+  1. The confidence interval will be larger than for samples using the z distribution
+  2. The region where H~0~ is not rejected is larger than for samples using the z distribution
+  3. A larger test value will be needed to reject the null hypothesis than samples using the z distribution
+
+:::
+
+## An example 
+
+Let's use the same in-class intervention example. Again, the population mean test score is 85, but now we don't know the standard deviation for that. We now have tried the intervention on a sample of 20 students. When these students take the test, they receive a mean score of 88 with a standard deviation of 3. Using what we know and the t distribution, what can we say about the effectiveness of the test?
+
+## 1. State the hypotheses 
+
+H~0~: There is no difference in mean test score between the students who do and do not undergo the intervention
+<br>
+H~1~: There is a difference in mean test score between students who do and do not undergo the intervention
+
+## 2. Determine the characteristics of the comparison distribution
+
+Stated in the example: mean test score of 85.
+
+## 3. Determine the critical value
+
+Let's say we want to use a two-tailed test with $\alpha$ = 0.05. The critical values we need are located at the following probability values: 0.025 and 1-0.025. 
+
+We need one additional piece of information here: the degrees of freedom. For the one sample t-test, we set this to n-1.
+
+```{r}
+qt(c(0.025, 1-0.025), df = 20-1)
+```
+
+## 3. Determine the critical value
+
+Note that the critical values for a two tailed z-test with $\alpha$ = 0.05 were: -1.96, 1.96.
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -2.09))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(2.09, 4))+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()
+
+```
+## 4. Calculate the test statistic
+
+The t-test has the same formula as the z-test. The only thing that changes is the critical value table. So, to calculate the test statistic *t*, we do:
+
+```{r}
+t <- (88-85)/(3/sqrt(20))
+t
+```
+
+## 5. Decide whether to reject the null 
+
+Compare the critical value to the test value, then plot it. What can we say about the null hypothesis?
+
+```{r, echo = FALSE}
+ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(-4, -2.09))+
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = 0, sd = 1), fill = "red", alpha = 0.4, xlim = c(2.09, 4))+
+  geom_vline(xintercept = 4.47, lty = "dashed")+
+  scale_x_continuous(breaks = seq(-4,4,1))+ labs(x = "", y = "proportion")+
+  theme_minimal()
+
+```
+
+# Your turn: Posit Cloud

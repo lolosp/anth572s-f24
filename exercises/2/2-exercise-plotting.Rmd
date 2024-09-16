@@ -1,0 +1,146 @@
+---
+title: "Intro to plotting with ggplot2"
+author: "Your-name-here"
+date: '2023-01-26'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+
+```
+
+## Set up 
+
+In this exercise, you will use `ggplot2` which will be loaded when you load `tidyverse`. You will also use the `penguins` dataset we've used before, which lives in the `palmerpenguins` package. 
+
+Look at the code chunk below. The code for loading the `tidyverse` library is already there. Modify the following line so you also load the `palmerpenguins` library. Make sure you feel comfortable with how loading packages works - you'll be expected to do that on your own.
+
+```{r }
+library(tidyverse)
+---()
+
+```
+
+Now, save the penguins dataset into your environment as `penguins`. That code is already written for you. Once you have loaded the dataframe, look at its structure and/or print the first few rows to get a sense for the dataset.
+
+```{r}
+penguins <- penguins 
+str(---)
+head(---)
+```
+
+## 1. Body mass in the penguins
+
+Q1. We want to understand the distribution of `body_mass_g` in this dataset. What type of variable is this?
+
+
+
+Q2. Given the type of variable, what type of plot should we use?
+
+
+
+Q3. Build the plot - remember to grammar of graphics principles and refer to your notes or readings for support
+
+```{r}
+ggplot(penguins, aes(x = ---, y = ---))+
+  geom_----()
+
+```
+
+Q3. Let's now modify this plot. You likely saw a warning pop up when running that last command that `ggplot2` automatically used 30 bins. "Bins" are the intervals used to divide up values of your continuous variables into a series of non-overlapping ranges into which individuals can be counted. Copy and paste your last set of code into this new chunk and modify it. Let's set a binwidth of 250, meaning that we would like to have even intervals of 250 units along the x axis.
+
+*Hint*: use your error message, your grammar of graphics concepts, the `?` and help viewers, resources on Brightspace, and the internet if you need support getting this done correctly!
+
+```{r}
+
+
+```
+
+
+Q4. Sometimes, it can be a bit difficult to see the differences between bars in a histogram. To help, let's adjust some of the colors in the plot. Copy and paste your last plot, and edit it to have two new arguments in your plotting layer: `color` and `fill`. Set `color` to `black` ; then set `fill` to whichever color you like! You can refer to your resources to see what colors are available to you.
+
+```{r}
+
+
+```
+
+
+Q5. What element of your plot did `fill` and `color` modify? 
+
+
+
+Q6. Using the plot that you have created, which weight interval has the most individuals? 
+
+
+
+
+## 2. Body mass by species of penguins 
+
+Let's now look at how body mass varies across species of penguins. 
+
+Q1. You already know what type of variable is contained in the `body_mass_g` vector. What type of variable is contained in the `species` vector? 
+
+
+
+Q2. Armed with the knowledge that these are the two variables you want to visualize, which type of plot should you use? 
+
+
+
+Q3. Create this to plot. The skeleton of the code you will need is prepared for you below: 
+
+```{r }
+ggplot(---, aes(x= ---, y = ---))+
+  geom_---()
+
+```
+
+
+Q2. Which species of penguins is the heaviest?
+
+
+
+Q3. Let's enhance the communicative value of our plot. Copy and paste the code for the original plot, then modify it. How would you color the boxes by species? 
+
+```{r}
+
+
+```
+
+
+
+Q4. Modify the plot again - how would you add a title and axis labels? 
+
+```{r}
+
+
+```
+
+
+Q5. Add another layer to the plot, this time a violin layer (`geom_violin()`). Consider the grammar of graphics - each layer is added on top of the last. Where in the line of code would you add it if you still wanted the boxplot to be visible?  
+
+```{r}
+
+
+```
+
+
+Q6. Copy and paste the code from Q4, and modify the plot a bit to make it prettier. Play with the `width` argument for the boxplot layer so that it fits inside the violin distribution. 
+
+```{r}
+
+
+```
+
+
+Q7. Lastly, we now have both axis labels on the x axis and a legend of colors to the right of our plot. This information is redundant, and we can increase the size of our plot by removing the legend. Add a layer to your previous plot that removes the legend from your plot.
+
+*Hint*: This task is a bit harder, and it requires you to search for the answer in the resources listed on Brightspace and/or by searching for help on the internet. Try a few solutions before asking for help - troubleshooting is an important skill!
+
+```{r}
+
+
+```
+

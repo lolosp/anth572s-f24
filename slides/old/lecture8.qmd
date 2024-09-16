@@ -1,0 +1,572 @@
+---
+title: "Relationships between variables 1"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+    tbl-cap-location: bottom
+editor: source
+---
+```{r, include = FALSE}
+library(tidyverse)
+library(palmerpenguins)
+library(car)
+mlb <- read.csv("../data/MLB-anthrops.csv")
+
+```
+
+## Shifting gears
+
+For the last few weeks, we've been dealing with comparing variables between groups/samples 
+
+Now we're moving on to describing relationships between variables - a slightly different goal
+
+##
+
+::: callout-note
+## Learning objectives
+**At the end of this lesson you will:**
+
+-   Understand correlation
+-   Be introduced to regression
+ 
+:::
+
+# Correlation
+
+## Motivating example 
+
+We have a dataset that includes over 1000 observations of anthropometrics for baseball players who play on different MLB teams. We want to know whether taller players also tend to be heavier  
+
+
+## Correlation
+
+A statistical technique that allows us to assess the association between two continuous variables
+
+In this case, we would be looking for the association between *height* and *weight*
+
+## Correlation
+
+The measure we will use is variably called: Pearson product moment correlation coefficient; Pearson's r; correlation coefficient
+
+Other measures: Spearman's rank correlation; Spearman's $\rho$
+
+## Pearson's r 
+
+Ranges between -1 and 1 and measures the *direction* and *strength* of the association between two continuous variables 
+
+. . . 
+
+<br> The direction is indicated by whether the correlation coefficient is positive or negative
+
+. . . 
+
+<br> The strength of the association is indicated by the size of the coefficient: 0 is no correlation, 1/-1 is a perfect correlation
+
+
+
+## Pearson's r 
+
+![](images/Four-correlations.png)
+
+## MLB example
+
+How would you visually classify the correlation between height and weight in MLB players?
+
+```{r}
+
+ggplot(mlb, aes(x = height, y = weight))+
+  geom_point(color = "purple2")+
+  geom_smooth(method = "lm", lty = "dashed", col = "black", se = F)+
+  theme_classic()
+
+```
+
+  
+
+## Interpreting Pearson's r
+
+| Correlation coefficient (r) |  Interpretation              |
+|-----------------------------|------------------------------|
+| +/- 1.0                     | Perfect association          |
+| +/- 0.8-1.0                 | Very strong association      |
+| +/- 0.6-0.8                 | Strong association           |
+| +/- 0.4-0.6                 | Moderate association         |
+| +/- 0.2-0.4                 | Weak association             |
+| +/- 0.0-0.2                 | Very weak or no association  |
+
+
+## Interpreting Pearson's r
+
+It's possible to test whether a correlation is significant or not 
+
+. . . 
+
+<br>H~0~: The correlation between the variables is zero
+<br><br>H~1~: The correlation between the variables is *not* zero 
+
+
+## Interpreting Pearson's r
+
+It is possible to get a weak but significant correlation given enough data
+
+
+. . . 
+
+::::{.columns}
+
+:::{.column width="60%"}
+![](images/Scatter-plot-weaksig.png)
+::: 
+
+:::{.column width="40%"}
+
+r = 0.36, p < 0.01
+
+:::
+
+::::
+
+## Back to the MLB example
+
+Is there an association between height and weight? 
+
+```{r}
+
+ggplot(mlb, aes(x = height, y = weight))+
+  geom_point(color = "purple2")+
+  geom_smooth(method = "lm", lty = "dashed", col = "black", se = F)+
+  theme_classic()
+
+```
+
+
+## MLB example
+
+Calculating the correlation coefficient between height and weight
+
+```{r}
+cor(mlb$height, mlb$weight, use = "complete.obs")
+```
+
+## MLB example 
+
+Calculating the correlation coefficient between height and weight and testing the null hypothesis that there is no association between the two variables
+
+```{r}
+cor.test(mlb$height, mlb$weight, use = "complete.obs")
+```
+
+## Assumptions for the correlation coefficient
+
+1. Related pairs of observations
+2. Normality of the variables
+3. No outliers
+4. Linear relationship between the variables
+
+## 1. Related pairs of observations 
+
+Just like the independence of observations, there is no formal way for us to test for this
+
+## 2. Normality of the variables
+
+Shapiro-Wilks test and/or QQ plot
+
+```{r}
+qqPlot(mlb$height)
+```
+
+## 3. No outliers
+
+Boxplots and other visual inspections of your data 
+
+```{r}
+ggplot(mlb, aes(y =height))+
+     geom_boxplot()
+
+```
+
+## 4. Linear relationship between variables
+
+Visual inspections of your data (i.e. scattergram)
+
+```{r}
+ggplot(mlb, aes(x = height, y = weight))+
+     geom_point()
+
+```
+
+## Correlation not causation
+
+It's very important to note that while we can demonstrate an association or correlation between two variables, this does not mean that there is a causal relationship between the two 
+
+. . . 
+
+:::{.incremental}
+Causality is typically determined with one of two study strategies: 
+
+1. A longitudinal study
+2. A randomized controlled trial (RCT)
+:::
+
+## Correlation not causation
+
+:::{.incremental}
+For any correlation between variables X and Y, there are three possible directions of causality:
+
+1. X could be causing Y
+2. Y could be causing X (reverse causation)
+3. Some third factor could be causing both X and Y 
+:::
+
+
+# Regression 
+
+## What is regression? 
+
+Regression is a technique that allows us to describe the relationship between an independent and dependent variable 
+
+. . . 
+
+<br> More importantly, we can use the output of a regression to predict the value of the dependent variable for a new (or existing) value of the independent variable
+
+## What is regression? 
+
+The output of the regression is an equation that describes the line of best fit between the independent and dependent variable
+
+```{r}
+
+ggplot(mlb, aes(x = height, y = weight))+
+  geom_point(color = "purple2")+
+  geom_smooth(method = "lm", lty = "dashed", col = "black", se = F)+
+  theme_classic()
+
+```
+
+## What is regression?
+
+The output of the regression is an equation that describes the line of best fit between the independent and dependent variable
+
+. . . 
+
+![](images/regression-equation.png)
+
+## What is regression? 
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r, echo = FALSE}
+
+ggplot(mlb, aes(x = height, y = weight))+
+  geom_point(color = "purple2")+
+  geom_smooth(method = "lm", lty = "dashed", col = "black", se = F)+
+  theme_classic()
+
+```
+:::
+
+:::{.column width="50%"}
+
+```{r}
+lm(weight ~ height, data = mlb)
+```
+:::
+
+::::
+
+. . . 
+
+weight = -155.092 + (4.841 * height)
+
+## Ordinary least square (OLS) regression 
+
+Regression minimizes the vertical distance between the points and the regression line (the residual)
+
+![](images/OLS-technique.png)
+
+## Residuals
+
+A *residual* is the difference between the real y value and the predicted y value, also written as $y - \hat{y}$
+
+<br>When performing the regression, we are trying to minimize the sum of the squared residual
+
+## OLS and residuals 
+
+![](images/OLS.gif)
+
+## Interpreting regression outputs
+
+```{r}
+reg1 <- lm(weight ~ height, data = mlb)
+reg1
+```
+
+. . . 
+
+The intercept is the value of Y when X=0
+
+. . . 
+
+The coefficient is the increase in Y for every increase of 1 unit in X
+
+
+## Interpreting regression outputs
+
+The p-values for the regression coefficients test whether or not the coefficient is different from 0. In other words, it evaluates whether there a relationship between the independent variable and the dependent variable
+
+```{r}
+summary(reg1)
+```
+
+## Interpreting regression outputs 
+
+The R squared is the square of r (Pearson's r). It is interpreted as the amount of variation in the dependent variable that can be explained by the independent variable. It is used as a measure of goodness of fit of the regression to the data.
+
+```{r}
+cor1 <- cor.test(mlb$height, mlb$weight, use = "complete.obs")
+cor1$estimate
+cor1$estimate^2
+summary(reg1)$r.squared
+
+```
+
+
+## Using a regression fit to predict
+
+What is the predicted weight for a player who is 75 inches tall?  (6'3)
+
+weight = -155.092 + (4.841 * height)
+
+
+. . . 
+
+```{r}
+y <- -155.092 + (4.841 * 75)
+y
+```
+
+. . . 
+
+```{r}
+newdf <- data.frame(height = 75)
+predict(reg1, newdf)
+```
+
+## Using a regression fit to predict
+
+```{r}
+ggplot(mlb, aes(x = height, y = weight))+
+  geom_point()+geom_smooth(method = "lm")+
+  geom_point(aes(x = 75, y = y ), col = "red", size = 3, shape = 3)
+
+```
+
+
+## Assumptions for a linear regression
+
+1. Independence of observations
+2. Linear relationship between X and Y
+3. Normality of residuals 
+4. Homoscedasticity 
+
+## 1. Independence of observations
+
+Assessed through knowledge of our data 
+
+## 2. Linear relationship between X and Y
+
+Assessed visually 
+
+```{r}
+ggplot(mlb, aes(x = height, y = weight))+
+  geom_point(color = "purple2")+
+  geom_smooth(method = "lm", lty = "dashed", col = "black", se = F)+
+  theme_classic()
+
+```
+
+## 3. Normality of residuals
+
+Here, we're no longer assessing each variable independently. We have to account for the relationship between the variables when calculating the residuals. 
+
+When we call `qqPlot`, we use the regression model rather than the raw data:
+
+```{r}
+qqPlot(reg1)
+```
+
+
+## 4. Homoscedasticity 
+
+Expresses that spread in the data should be roughly as large throughout the range of X. In other words, the variation in Y is about the same at all values of X. 
+
+```{r, echo = FALSE}
+ggplot(mlb, aes(x = height, y = weight))+
+  geom_point(color = "purple2")+
+  geom_smooth(method = "lm", lty = "dashed", col = "black", se = F)+
+  theme_classic()
+
+```
+
+## Confidence and prediction intervals
+
+We can quantify variability around our estimate in two different ways:
+
+1. Confidence intervals
+2. Prediction intervals
+
+## Confidence intervals
+
+Quantifies uncertainty around mean predictions of a fit - typically used in model diagnostics 
+
+![](images/PICI-v2.png)
+
+## Confidence intervals 
+
+```{r}
+new.heights <- data.frame(height = c(70, 75, 80))
+ci1 <- predict(reg1, new.heights, interval = "confidence") %>%
+  cbind(new.heights, .)
+ci1
+```
+
+## Prediction intervals
+
+Quantifies uncertainty around a single predicted value. This is the type of interval we are interested in when using a regression model to predict new values. 
+
+![](images/PICI-v2.png)
+
+## Prediction intervals
+
+```{r}
+ci2 <- predict(reg1, new.heights, interval = "prediction") %>%
+  cbind(new.heights, .)
+ci2
+```
+
+## Comparing prediction and confidence intervals
+
+```{r, results = FALSE}
+pred.pi <- predict(reg1, mlb, interval = "prediction")%>%
+  cbind(mlb, .)
+
+pred.pi <- predict(reg1, mlb, interval = "confidence")%>%
+  as.data.frame()%>%
+  rename(lwr.ci = lwr, upr.ci = upr) %>% select(-fit)%>%
+  cbind(pred.pi, .)
+
+plot.pi <- ggplot(pred.pi, aes(x = height, y = weight))+
+  geom_point(color = "grey60")+
+  geom_smooth(method = "lm", lty = "dashed", col = "grey60", se = F)+
+  geom_line(aes(y=lwr), color = "red", linetype = "dashed")+
+    geom_line(aes(y=upr), color = "red", linetype = "dashed")+
+  geom_point(aes(x = height, y = fit), col = "black")+ 
+  geom_line(aes(y=lwr.ci), color = "blue", linetype = "dashed")+
+    geom_line(aes(y=upr.ci), color = "blue", linetype = "dashed")+
+  theme_classic()
+
+```
+
+## Comparing prediction and confidence intervals
+
+```{r}
+plot.pi
+```
+
+
+## Multiple and categorical predictors
+
+We can also add more predictors, and use categorical predictors 
+
+```{r}
+reg2 <- lm(weight ~ height + position, data = mlb)
+summary(reg2)
+```
+
+## Categorical predictors
+
+Categorical predictors are coded as dummy variables (0-1). The coefficient expresses the change in $\hat{y}$ from baseline associated with belonging to the category. 
+
+We can set the baseline using a factor and setting the reference category we want. By default the baseline is the first in alphabetical order or the lowest integer value.
+
+## Categorical predictors
+
+```{r}
+unique(mlb$position)
+
+mlb <- mlb %>%
+  mutate(position.fct = as.factor(position), 
+         position.fct = fct_relevel(position, "First_Baseman"))
+
+str(mlb$position.fct)
+
+lm(weight ~ height + position.fct, data = mlb)
+```
+
+## Interpreting and predicting with categorical predictors
+
+What is the predicted weight for a player who is 75 inches tall who plays as a starting pitcher?
+
+weight = -136.122 + (4.681 * height) + (-8.566 * yes)
+
+
+. . . 
+
+```{r}
+y <- -136.122 + (4.681 * 75) + (-8.566 * 1)
+y
+```
+
+. . . 
+
+```{r}
+newdf <- data.frame(height = 75, position = "Starting_Pitcher")
+predict(reg2, newdf)
+```
+
+## Multiple predictors 
+
+Each term is interpreted independently of the other terms as causing a change in $\hat{y}$ "holding all else equal". 
+
+In this example, holding all else equal, an increase of 1 inch in height is associated with an increase of 4.68 lbs in weight. 
+
+Holding all else equal, Designated Hitters are 9.54 pounds heavier than Catchers (baseline).
+
+```{r}
+reg2$coefficients
+```
+
+# Your turn 
+
+# Quiz 
+
+## General info
+
+- Wednesday March 27th
+- During class 
+- Short answer and MC
+
+## Topics covered
+
+- No code
+- Selecting appropriate plots 
+- Measures of centrality and dispersion
+- Key definitions
+- Selecting appropriate tests 
+- Writing null/alternate hypotheses
+- Processes for hypothesis testing
+- Assumptions for major tests
+
+## Example
+
+![](images/example-1.png)
+
+## Example
+
+![](images/example-2.png)

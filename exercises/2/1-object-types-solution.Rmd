@@ -1,0 +1,148 @@
+---
+title: 'Exercise 1: Data types in R'
+author: "Answer key"
+date: "`r Sys.Date()`"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+## 1. Learning about vectors 
+
+Let's start to put some of your new vector skills to the test. Start by making two vectors. 
+
+1. A vector containing the following values: 1, 3, 5.5, 7.5, 10, 2, 8.5, 9. Save it under the name vector1.
+2. A vector containing the following values:  apple, banana, orange, raspberry, peach, cherry, kiwi, pear. Save it under the name vector2.
+
+Hint: some code is provided to help you start. Delete any `---` segments and replace them with the correct information.
+
+```{r}
+vector1 <- c(1, 3, 5.5, 7.5, 10, 2, 8.5, 9)
+
+vector2 <- c("apple", "banana", "orange", "raspberry", "peach", "cherry", "kiwi", "pear") # this one is slightly harder!
+```
+
+Q1.1. What type of vector is `vector1`? 
+
+*Numeric/double*
+
+Q1.2. What type of vector is `vector2`?
+
+*Character/string*
+
+Q1.3. Show the code you would use to find the type of `vector1` and `vector2` below:
+
+*Note: any of the following is fine!*
+
+```{r}
+typeof(vector1)
+class(vector1)
+str(vector1)
+```
+
+Q1.4. If you wanted to change the type of `vector1` so that it became a character vector, how would you do this? Show your code below. Save it under an object name of your choice that is not `vector1`
+
+```{r}
+vec1.chara <- as.character(vector1)
+```
+
+
+Q1.5. If you tried to convert `vector2` to a numerical vector, what do you think would happen?
+
+*The operation will not run*
+
+Q1.6. Try it, showing your code below, and save the vector as `vector2.num`. Then, print the results. What values does `vector2.num` contain?
+
+*`vector2.num` is now filled with `NA` values*
+
+```{r}
+
+vector2.num <- as.numeric(vector2)
+vector2.num
+  
+```
+
+
+## 2. Building vectors into dataframes 
+
+Let's introduce a new set of functions to build data frames from vectors. `data.frame()` is a function that allows us to combine two or more vectors into a data frame. Note: in order for vectors to be combined into a dataframe, all vectors must have the same length, which means that they must have the same number of elements. 
+Let's combine `vector1` and `vector2` into a single dataframe. First, let's check the length of both variables using the function `length()`
+
+Q2.1. Are the two vectors of the same length? Use `length()` to check, and show your code below
+
+*Yes the two vectors are the same length*
+
+```{r}
+length(vector1)
+length(vector2)
+```
+
+Q2.2. Let's combine the two variables. Let's assume that `vector2`, a character vector referring to different fruits, is the unit of observation, and that `vector1` is the a numerical variable referring to a tastiness rating (1-10). Combine the two vectors with `data.frame()`, and save them as `fruit`  
+
+```{r}
+fruit <- data.frame(vector2, 
+                  vector1)
+```
+
+Q2.3. Inspect the structure of your new dataframe using `str(), and show your code below.
+
+```{r}
+str(fruit)
+
+```
+
+The column names of the dataframe are not very informative - but we can change that! We can do that by assigning a vector of more informative names to the column names of the dataframe. 
+
+Q2.4. First, create a vector called `names` containing two elements: the first is the new name for column 1, and the second is the new name for column 2. You can choose to name them whatever you like. What type of vector will you be creating here? Show the relevant code below.
+
+*This should be a character vector with string entries*
+
+```{r}
+names <- c("item", "rating")
+```
+
+Q2.5. Now, assign the `names` vector to the column names of dataframe `fruit`. The function `colnames()` will refer to the column names of the dataframe, which is the argument of the function. The vector that you assign will be `names`, which contains the new names you'd like to write onto the column names. Once you've assigned the new column names, use `colnames()` one more time to simply print the column names of the `fruit` dataset to check that the assignment of new names was done properly.  
+
+```{r}
+colnames(fruit) <- names
+colnames(fruit)
+```
+
+Q2.6 How many observations are in the fruit dataframe?
+Hint: you can use several functions to answer this question including `str()`, `print()`, `nrow()`. You can test all three to see what they return.
+
+*There are 8 observations in the df*
+
+```{r}
+str(fruit)
+```
+
+
+To access elements of a dataframe (and elements within other objects, for example regression models you will build later on!), we use a special operator: `$`.
+
+For example, run this piece of code line by line. This uses a dataset called `mtcars`, which contains informations about different models of cars and attributes for each one. Note what happens with each line, and see how the `$` operator allows you to select out the `mpg` column.
+
+```{r}
+# load the dataset and save it to your environment
+mtcars <- mtcars
+
+# pull up all the names of the variables in the dataframe
+colnames(mtcars)
+
+# select out the mpg variable
+mtcars$mpg
+
+```
+
+Q2.7. Print the values held in the second column of the `fruit` dataframe. Since you changed the column names, use the `colnames()` function to refresh yourself on what the variable is called. Use the `$` operator to refer to the name of the column within the dataset.
+
+```{r}
+colnames(fruit)
+print(fruit$rating)
+
+```
+
+

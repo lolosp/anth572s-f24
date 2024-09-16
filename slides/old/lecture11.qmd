@@ -1,0 +1,538 @@
+---
+title: "Dimensionality reduction"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+library(palmerpenguins)
+library(plotly)
+library(viridis)
+```
+
+## What is dimensionality reduction? 
+
+A process which takes multiple to many variables and finds a few variables that explain most of the variation in the raw data sets 
+
+
+## Types of dimensionality reduction 
+
+:::{.incremental}
+1. Principal components analysis (PCA)
+2. Multiple correspondance analysis (MCA)
+3. Factor analysis (FA)
+4. Factor analysis of mixed data (FAMD)
+:::
+
+
+## Advantages of dimensionality reduction 
+
+:::{.incremental}
+- Can help deal with multicollinearity in multivariate models
+<br>
+- Creates new variables that can be analyzed in their own right
+:::
+
+## Dimensionality reduction in R 
+
+There are now multiple packages available, including: 
+
+- *base*, implementing PCA
+- *psych*, implementing PCA, FA and MCA
+- *FactoMineR*, implementing PCA, FA, MCA, FAMD
+- *factoextra*, implementing visualization and extraction tools
+- *Lavaan*, primarily EFA and CFA 
+- *ade4*, primarily PCA and MCA 
+
+
+## Principal component analysis
+
+Primarily well suited to continuous numerical data 
+
+. . . 
+
+<br> In anthropology, used to reduce variation in shape or in bio/molecular data, for deriviing indices such as socioeconomic scales, etc
+
+
+## Multiple correspondance analysis 
+
+Suited for nominal data (non-ordered categorical data)
+
+. . . 
+
+<br> In anthropology, used to summarize artifact or site attributes
+
+## Factor analysis 
+
+Can be used with different types of variables including numerical, binary, ordinal
+
+. . . 
+
+<br> Typically used when there is a latent variable or trait that we are seeking to retrieve 
+. . . 
+
+<br> Primarily used in psychometrics, but can also be used for scales in cross-cultural research
+
+## Factor analysis of mixed data
+
+An extension of FA, which roughly corresponds to a combination of PCA with MCA
+
+. . . 
+
+In anthropology, used a bit for site/feature analysis, could also be used for socioeconomic scales
+
+
+# Principles of data reduction 
+
+## Shared principles between data reduction methods
+
+Dimensionality reduction is achieved by attempting to explain variation in the variables
+
+. . . 
+
+<br> Specifically, correlation matrices are produced and variables are produced to summarize patterns in the correlations. 
+
+. . . 
+
+<br> The specific method used to summarize the correlation between the variables of interest is what sets apart different "flavours" of dimensionality reduction
+
+
+# Principal component analysis
+
+## Principal component analysis 
+
+PCA is achieved through rotation of the data in multidimensional space, fitting axes (components) which minimize the orthogonal distance between the individuals and the component. 
+
+. . . 
+
+<br>
+
+Once the first best-fit component is worked out, the next best fit component (orthogonal) is fit.
+
+
+## Minimizing orthogonal distance
+
+![](images/pca-rotation-1.gif)
+
+## Maximizing variation along the PCs
+
+![](images/pca-1.png)
+
+## Principle components in 3D space
+
+![](images/pca-2-3d.jpeg)
+
+
+## Data handled in PCA 
+
+PCA is meant to handle continuous data, but people use it for ordinal regularly, and even for nominal data types
+
+. . . 
+
+<br> Numeric data, can be dichotomous, can be dummy-coded categorical data
+
+## Variable scaling
+
+Because PCA attempts to explain variation in a dataset, the scales of the variables matter. For example, if you have two variables, one on the cm scale and one on the mm scale, the variable on the mm scale will have higher variance and dominate your PCA 
+
+. . . 
+
+It's important to center and scale your variables. Most packages do this automatically, but you can do it manually if you like 
+
+## Variable scaling
+
+```{r}
+penguins %>% 
+  mutate(flipper.s = scale(flipper_length_mm))%>%
+  ggplot(aes(x = flipper.s))+geom_histogram()
+
+```
+
+## Results - Eigenvectors and eigenvalues 
+
+*Eigenvectors* are the lines drawn through the data. Eigenvectors express the direction of the principal component and the correlation of the PC with the original data. 
+
+. . .
+
+<br> *Eigenvalues* express the amount of variation captured by each PC - the higher the eigenvalue, the more variance it explains
+
+
+## A brief video
+
+[StatQuest](https://www.youtube.com/watch?v=HMOI_lkzW08&ab_channel=StatQuestwithJoshStarmer)
+
+## An example: summarizing variation in body shape in the `palmerpenguins` dataset
+
+```{r}
+penguins <- penguins
+head(penguins)
+```
+
+## An example: summarizing variation in body shape in the `palmerpenguins` dataset
+
+```{r}
+penguins <- penguins %>% 
+  select(species, sex, bill_length_mm, bill_depth_mm, 
+         flipper_length_mm, body_mass_g)%>%
+  na.omit()
+```
+
+
+## Calculating the correlation matrix
+
+For more options see corrplot [vignette](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)
+```{r}
+library(corrplot)
+cormatrix <- cor(penguins[, 3:6])
+corrplot(cormatrix, type = "lower", method = "ellipse")
+```
+
+
+## Three variable example 
+
+```{r}
+plot_ly(penguins, x = ~flipper_length_mm, y = ~bill_length_mm, z = ~body_mass_g,
+        type="scatter3d", mode="markers", color=~species)
+
+```
+
+
+## Running PCA with *FactoMineR*
+
+```{r}
+library(FactoMineR)
+pca <- PCA(penguins, quali.sup = c(1,2), graph = FALSE) # allows us to keep our non-PCA vars
+```
+
+## Visualizing the results of PCA with *factoextra*
+
+Which vars load onto which factors? 
+
+```{r}
+library(factoextra)
+fviz_pca_var(pca, col.var="contrib")
+```
+
+## Extracting variable loadings
+
+Loadings are the correlation between the original variables and the factors
+
+```{r}
+var <- get_pca_var(pca)
+var$coord
+var$cos2
+```
+
+## Visualizing the results of PCA with *factoextra*
+
+```{r}
+fviz_pca_biplot(pca, geom.ind = "point")
+```
+
+
+## Visualizing the results of PCA with *factoextra*
+
+```{r}
+fviz_pca_ind(pca, geom.ind = "point",
+             habillage = "species", 
+             addEllipses = TRUE)
+```
+
+## Visualizing the results of PCA with *factoextra*
+
+```{r}
+fviz_pca_ind(pca, geom.ind = "point",
+             habillage = "sex", 
+             addEllipses = TRUE)
+```
+
+## How many PCs to retain? 
+
+:::{.incremental}
+Generally, two competing methods for deciding how many factors/components to retain:
+
+1. Eigenvalues
+2. Scree plot
+
+:::
+
+## Retaining PCs based on eigenvalues
+
+Recommendation is that you only keep factors with eigenvalues > 1. Eigenvalue = 1 suggests that a PC explains as much variation as a raw variable.
+
+```{r}
+pca$eig
+```
+
+## Retaining PCs based on scree plots
+
+Scree plots visualize the percentage of variance explained. You're looking here for an "elbow" indicating a change in the direction of the decline of additional variance explained
+
+```{r}
+fviz_screeplot(pca)
+
+```
+
+## Visualizing your options prior to formalizing a model
+
+```{r}
+library(psych)
+fa.parallel(penguins[,3:6])
+```
+
+## Extracting individual scores from the PCA model
+
+```{r}
+ind <- get_pca_ind(pca)
+head(ind$coord)
+
+penguins$dim1 <- ind$coord[,1]
+penguins$dim2 <- ind$coord[,2]
+
+```
+
+
+## Make your own PC plot
+
+```{r}
+library(ggpubr)
+ggplot(penguins, aes(x = dim1, y = dim2, col=species, fill = species))+
+  geom_point()+
+  stat_chull(geom = "polygon", alpha = 0.2)
+
+```
+
+
+# Your turn 
+
+# Factor analysis 
+
+## Factor analysis as a variation on PCA 
+
+Factor analysis is similar to PCA, and the principles we learned in PCA apply to FA as well. 
+
+. . . 
+
+<br>However, FA is different from PCA in that it assumes that there is a latent unobserved variable (or several) that drives variation across measured variables 
+
+. . .
+
+<br> FA attempts to maximally explain commonality rather than maximally explain variance
+
+## Factor analysis as a variation on PCA 
+
+Because FA tries to estimate a latent variable:
+
+<br> 1. In a full workflow, FA is broken down into EFA and CFA 
+
+<br> 2. Solutions can be extended to estimate factor scores for new individuals
+
+
+## EFA versus CFA 
+
+Goal of EFA is to derive factors - we start with the data and we summarize it with FA 
+
+. . . 
+
+<br>
+
+The goal of CFA is to confirm whether the factors explain variation, typically in another dataset. We start with the factors, and try to match them back onto our new dataset. 
+
+. . . 
+
+<br> If you're going to run FA in your analyses, you will likely do EFA only
+
+
+## An example with the *psych* package
+
+```{r, include = FALSE}
+library(openxlsx)
+religion <- read.xlsx("../data/data-combined-21-05-27.xlsx")
+
+religion$relig_activity[is.na(religion$relig_activity)] <- 0
+
+religion <- religion %>% 
+  mutate(relig = as.factor(relig),
+         ritual = fct_relevel(ritual, c("Never", "Less than once a year", 
+                                        "Once a year", "Only on holidays",
+                                        "Once a month", "Once a week", 
+                                        "More than once a week")),
+         ritual2 = fct_collapse(ritual, 
+                                "Once a week or more" = c("Once a week", 
+                                                          "More than once a week"),
+                                "Once a month" = "Once a month",
+                                "Occasionally" = c("Less than once a year", 
+                                                   "Once a year", "Only on holidays"),
+                                "Never" = "Never"),
+         pray = fct_relevel(pray, c("Never", "Less than once a month", "Once a month", 
+                                    "Once a week", "Daily or almost daily")),
+         pray2 = fct_collapse(pray, "Never" = "Never",
+                              "Occasionally" = c("Less than once a month", 
+                                                 "Once a month"),
+                              "Weekly" = "Once a week",
+                              "Daily" = "Daily or almost daily"),
+         pray2 = fct_relevel(pray2, c("Never", "Occasionally", "Weekly", "Daily")),
+         relig_activity2 = ifelse(relig_activity > 0, 1, 0)
+  )
+
+religion <- religion %>% 
+  mutate(ritual2 = as.numeric(ritual2),
+         pray2 = as.numeric(pray2),
+         relig_import2 = fct_relevel(relig_import2, c("Not important", "Somewhat important", "Very important")),
+         relig_import2 = as.numeric(relig_import2),
+         relig_activity = ifelse(relig_activity == 0, 1, 
+                                 ifelse(relig_activity > 10, 3, 2)))
+```
+
+```{r}
+relig <- religion %>% 
+  column_to_rownames(., var = "id_anon")%>%
+  select(ritual2, pray2, relig_import2, relig_activity)
+
+head(relig)
+```
+
+## Polychoric correlation matrix
+
+Polychoric correlation matrices allow you to account for ordinal variables
+
+```{r, warning = FALSE}
+poly_cor <- polychoric(relig)
+poly_rho <- poly_cor$rho
+cor.plot(poly_rho)
+```
+
+## Polychoric versus plain correlation matrices
+
+Taking into account the structure of the data enables us to better detect correlation
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r}
+cor.plot(poly_rho)
+```
+
+:::
+
+:::{.column width="50%"}
+
+```{r}
+cor.plot(relig)
+```
+
+:::
+
+::::
+
+
+
+## Exploring potential solutions
+
+Only 1 factor has eigenvalues > 1, which suggests that the data is adequately summarized by a single factor
+
+```{r}
+fa.parallel(poly_rho, n.obs=1532, cor ="poly")
+```
+
+## Running the model 
+
+Set the nfactor based on the results of the scree plot analysis and specify the type of correlation to be undertaken 
+
+```{r, warning = FALSE}
+poly_model <- fa(relig, nfactor=1, cor="poly", 
+                 fm="mle", rotate = "none")
+```
+
+## Plot the loadings for the model
+
+```{r}
+plot(poly_model)
+str(relig)
+```
+
+## Visualizing the relationship between the factors and the variables
+
+```{r}
+fa.diagram(poly_model)
+
+```
+## Visualizing the relationship between the factors and the variables
+
+```{r}
+colnames(poly_model$loadings) <- c("Factor1")
+rownames(poly_model$loadings) <- c("Religious importance", "Frequency of prayer", 
+                                   "Frequency of ritual", "Religious activities")
+fa2 <- fa.diagram(poly_model)
+```
+
+
+## Factor tuning and internal consistency with Cronbach's `alpha`
+```{r}
+alpha(poly_rho)
+
+```
+
+
+## Extracting individual scores
+
+```{r}
+relig_fitted <- religion %>% 
+  select(age, country, ritual2, pray2, relig_import2, relig_activity, relig, births_num)
+
+relig_fitted$scores <- factor.scores(relig, poly_model)$scores
+
+factor.scores(relig, poly_model)
+```
+
+## Plotting scores
+
+```{r}
+relig_fitted %>% 
+  filter(relig == "Yes") %>% 
+ggplot(aes(x = scores, fill = country))+
+  geom_density(alpha = 0.7)+
+  scale_fill_viridis_d() + labs(title = "US mothers have higher religiosity scores")+ theme_classic()
+
+```
+
+## Modelling with scores
+
+```{r, include = FALSE}
+us <- relig_fitted %>% filter(country == "US")
+uk <- relig_fitted %>% filter(country == "UK")
+
+# for US
+adj_comb <- lm(births_num ~ age, data = us)
+us$fit_agebirths <- predict(adj_comb, newdata = us)
+us$births_adj <- us$births_num - us$fit_agebirths
+
+# for UK
+adj_comb <- lm(births_num ~ age, data = uk)
+uk$fit_agebirths <- predict(adj_comb, newdata = uk)
+uk$births_adj <- uk$births_num - uk$fit_agebirths
+
+relig_fitted <- rbind(us, uk)
+
+```
+
+```{r}
+model1 <- lm(births_adj ~ scores, data = relig_fitted) 
+summary(model1)
+```
+
+## Modeling with scores
+
+```{r}
+model2 <- glm(births_num ~ age + scores, data = relig_fitted, family = poisson) 
+summary(model2)
+```

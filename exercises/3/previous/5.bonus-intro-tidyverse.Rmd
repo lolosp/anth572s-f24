@@ -1,0 +1,156 @@
+---
+title: "What the heck is the tidyverse?"
+author: "Your-name-here"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # this sets the option to include your code in your output
+```
+
+## What is the tidyverse?
+
+The `tidyverse` is a collection of packages developed by RStudio's team that shares a common syntax and has tidy principles in mind. It is incredibly powerful for dealing with and analyzing dataframes (and tibbles but that's a conversation for another day). The tidyverse packages can all be loaded by loading `tidyverse`
+
+Replace the dashes `---` to complete this piece of code and load the `tidyverse`:
+
+```{r loadtidy}
+---(tidyverse)
+```
+
+How many packages were loaded when we loaded the tidyverse?
+
+Which packages were loaded when we loaded the tidyverse?
+
+
+## `dplyr`
+
+Easily the MVP (most valued package) of data analysts, though `ggplot2` certainly is a close second. This is a tool that you must get comfortable with if you are to work with real life data. 
+
+`dplyr` is meant to help you manipulate dataframes and wrangle data into usable formats. It takes a human readable approach to data management, which makes it infinitely easier to manipulate data. Let's take it for a spin by using dplyr to manipulate some archaeological data from the Eurasian steppes, stored in the `kurgans_catacomb` dataframe (it's really a tibble) in the package `evoarchdata` -- also written `evoarchdata::kurgans_catacomb`.
+
+First, we have to load the package and the dataset. By the way, the full data name is a bit long to type, so let's assign it to an object called `tomb` instead.
+
+```{r}
+library(evoarchdata)
+
+tomb <- kurgans_catacomb
+```
+
+Before we do anything with this dataframe, we have to know what it looks like - let's check out its structure with `str()`
+
+```{r}
+str(tomb)
+```
+
+How many observations were recorded in this dataset? 
+
+What is the unit of measurement/the unit of recording in this dataset?
+
+Does this dataset consist of raw data or is it summarized data? Hint: use `view()` or double-click the dataset in your environment to scroll through it. 
+
+Could the ordering of the variables in this dataframe be improved?
+
+## Subsetting in `dplyr`
+
+This is an operation you will use all the time, so let's learn to work with it sooner rather than later.  
+Let's say we were interested in finding out the number of graves that were found at the Belolesye site. We can use the function `filter()` to do that as follows:
+
+```{r}
+filter(tomb, site == "Belolesye")
+
+### this is the same thing as the following code: 
+
+tomb %>% 
+  filter(site == "Belolesye")
+
+```
+
+Why is that? This has to do with the magic of the `tidyverse`. Use `?` to read about the `filter()` function. The first argument is `.data` - this is a programmatic function. `.data` uses the dataframe that it is fed by the pipe operator `%>%`. 
+
+In human speak, a statement with pipe operator can be read as "then", so that the piped statement above reads something like "take the dataframe 'tomb' then filter it for values of site matching 'Belolesye'". 
+
+This seems minimal now, but when you are stringing together a few operations, it becomes super helpful.
+
+Ok your turn - let's filter the `tomb` dataset for observations from the `Pieski` site. How many observations are there?
+
+```{r}
+--- %>% 
+  filter(site == "")
+```
+
+Let's say you wanted to quickly see if how old (`age`) the individuals buried at tombs in the Belolesye site were - and you also wanted to know if they were buried with animal bones (`animal_bones`). You could use the `select()` function to select the columns of interest and quickly view them. 
+
+```{r}
+
+tomb %>% 
+  filter(site == "Belolesye")%>% 
+  select(id, site, age, animal_bones)
+
+```
+
+Now, let's say you were interested in lithics in the same site. What command would you run to see the following columns for the Belolesye site? `axe_hammer`, `arrowhead`, `bow` and `brozeknife`.
+
+```{r}
+tomb %>% 
+  filter(---)%>%
+  select(---)
+``` 
+
+## `mutate()`
+
+Another very powerful tool in `dplyr` is `mutate`, which is a function that allows you to transform columns in very flexible ways. Let's try it out on the `penguins` dataset from the `palmerpenguins` package. 
+
+First, let's load it and assign the dataset to the object `penguins`
+
+```{r}
+---(palmerpenguins)
+penguins <- penguins
+
+# make sure you take a look at the structure of the dataset!
+---(penguins)
+
+# you could learn more about the dataset by asking R about it as well
+?penguins
+```
+
+Let's say we wanted to transform the flipper length variable (`flipper_length_mm`) into cm rather than mm. We could use mutate to do this:
+
+```{r}
+
+penguins %>%
+  mutate(flipper_length_cm = flipper_length_mm /10)
+
+```
+
+Inspect the structure of penguins. Do you see your new variable? Why not?
+
+Modify the code so that your new column is saved in the dataframe.
+
+### Exercise:
+
+What if you wanted to create a new variable called `cute` that coded "Yes" if the penguin's bill length is smaller than 35mm, and "No" if otherwise? Hint: use `mutate()` and a new-to-you function called `ifelse()`. To learn about this new function, enter `?ifelse` into the console.
+
+
+```{r}
+
+```
+
+
+## Exercise: 
+
+How does flipper length vary across the different species of penguins in the `penguins` dataset? Answer this by both creating summary statistics and data visualizations. This is a complex task you are being asked to do, so it make take a bit of time to work through it. 
+
+```{r}
+
+
+```
+
+
+Using your intuition in combination with the information you just produced (summary statistics and data visualizations), do you think flipper length is similar or different across the groups? 
+
+
+
+
+

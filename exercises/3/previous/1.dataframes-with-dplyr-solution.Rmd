@@ -1,0 +1,150 @@
+---
+title: "Working with dataframes"
+author: "Answer key"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Set up
+
+In this exercise, we're going to use how to manipulate dataframes using a dataset on air pollution in Chicago. You'll want to load the `tidyverse` package, then read in the air pollution data from the .csv file contained in the project. This is a new way to load data for you, so I'll write the code for reading in the data. Note the code though! This is likely an operation you'll repeat.
+
+```{r}
+library(tidyverse)
+chicago <- read.csv("chicago-air-pollution.csv")
+chicago <- as_tibble(chicago) # I made this a tibble for better printing :) 
+```
+
+## 1. Get familiar with the dataframe
+
+Take some time to familiarize yourself with the dataset. The data contain information on the concentration of different pollutants  
+
+#### Q1.1. Examine the structure and print the first few rows of the dataframe. What do you think is the unit of observation for this particular dataset?
+
+*The unit of observation is each day*
+
+```{r}
+str(chicago)
+head(chicago)
+
+```
+
+## 2. Using `select()`
+
+#### Q2.1. The only value contained by the `city` column is "chic" for Chicago, so this column is not informative. Use `select()` to remove it from the dataframe, and save your results as `chicago`. This will overwrite the original dataframe.
+
+```{r}
+chicago <- select(chicago, -city)
+
+# also works:
+# chicago <- chicago %>% 
+#   select(-city)
+
+```
+
+#### Q2.1. Say you only wanted to keep the last four variables, which code for the recorded values of four types of pollutants. All four variables end in "mean2". Write a statement combining `select()` with a helper function to recognize that pattern in the name. 
+Hint: you're looking for one of these - `starts_with()`, `ends_with()`, `contains()`, `matches()` 
+
+```{r}
+select(chicago, ends_with("mean2"))
+```
+
+## 3. Using `filter()`
+
+PM2.5 levels are considered little to no risk if they are below 12 micrograms/m^3. They are considered unhealthy and can start causing issues for people with breathing problems if they are above 35. 
+
+#### Q3.1. Use filter to create a subset of the `chicago` data that keeps all the observations for which PM2.5 levels are below 12. Then, use a pipe to count the number of rows contained in this new dataset
+Hint: you can use either `nrow()` or `count()` for this
+
+```{r}
+filter(chicago, pm25tmean2 < 12) %>% count()
+```
+
+#### Q3.2. Now create a subset of the `chicago` data that keeps all the observations for which PM2.5 levels are at or above 35. Use a pipe to count the number of rows contained in this new dataset. During the observation period, has Chicago experience more days where the PM2.5 was normal or days where it was likely to begin causing breathing difficulties?
+
+*Chicago had 955 "safe" days (PM2.5 < 12) and 97 "unsafe" days (PM2.5 >= 35), so it has had more safe days*
+
+```{r}
+chicago %>% 
+  filter(pm25tmean2 >= 35)%>% 
+  count()
+```
+
+
+#### Q3.3. Filter out all observations where PM2.5 values are missing. Then filter out observations where `tmpd`, a variable that records daily average temperature, is also missing. Then, use `ggplot2` to plot the relationship between daily average temperature (x-axis) and PM2.5 (y-axis), adding a fitted line if needed. Is there a relationship between the two?
+
+Hint: you'll need `is.na()`, `!`, and `%>%` for this!
+
+```{r}
+chicago %>% 
+  filter(!is.na(pm25tmean2))%>% 
+  filter(!is.na(tmpd))%>%
+  ggplot(aes(x = tmpd, y = pm25tmean2))+ # note that because you piped in a dataset you don't need to specify it again
+    geom_point()+
+    geom_smooth(method = "loess") # you could specify whatever method you want here
+
+```
+
+## 4. Using `rename()`
+
+Having now worked with the variables a little, you can see that the names are not user friendly. 
+
+#### Q4.1. Replace the names for the following variables with something that sound better to you. Then save the dataset with the object name `chicago`, overwriting it.
+
+  - `tmpd` - A variable coding for temperature
+  - `dptp` - A variable coding for dewpoint
+  - `pm25tmean2` - A variable coding for the concentration of PM2.5
+  - `pm10tmean2` - A variable coding for the concentration of PM10
+  
+```{r}
+chicago <- chicago %>% # note: you need to assign the result back to the dataframe, or you will not overwrite it!
+  rename(temp = tmpd, # naming syntax: newvar = oldvar
+          dew = dptp, 
+         pm25 = pm25tmean2, 
+         pm10 = pm10tmean2)
+
+```
+
+## 5. Using `mutate()`
+
+#### Q5.1. Let's create z-scores for PM2.5 for each of the observations in order to how much any given observation deviated from the mean. Use mutate to do this. Assign the new column a name that is reasonable. 
+
+```{r}
+# remember that you will have chosen different variable names for your renamed variables
+# remember that z = (value - mean)/sd, this is the equation you want to implement
+
+chicago %>% 
+  mutate(pm25.z = pm25 - mean(pm25, na.rm = TRUE), # note here, we are calculating the mean pm25 in line
+          pm25.z = pm25.z / sd(pm25, na.rm = TRUE )) # note here, you are modifying the new variable ! 
+
+# you could also do it in a single line:
+chicago %>% 
+  mutate(pm25.z = (pm25 - mean(pm25, na.rm = T)) / sd(pm25, na.rm = T) ) 
+
+```
+
+#### Q5.2. Create a new variable called `pm2.5_rel` with three levels (low, medium, and high) that codes three levels of PM2.5 concentration: <12, 12-35, and >= 35. 
+
+Hint: Use `ifelse()` statements. You can nest one within the other. Note that if the first `ifelse()` condition is met, the operation for `TRUE` is applied and  the next value is evaluated against the `ifelse()` statements. 
+
+```{r}
+
+chicago %>% 
+  mutate(pm2.5_rel = ifelse(pm25 < 12, "low", #ifelse1
+                            ifelse(pm25 < 35 , "medium" , "high" )) #ifelse2
+         )
+
+```
+
+#### Q5.3. What kind of variable did you create in question 5.2?
+
+*An ordinal variable!*
+
+
+## Attribution
+
+This exercise was inspired by [RD Peng's Biostatistics lectures](https://rdpeng.github.io/Biostat776/lecture-managing-data-frames-with-the-tidyverse.html#select)

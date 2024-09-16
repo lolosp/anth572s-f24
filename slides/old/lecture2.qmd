@@ -1,0 +1,1235 @@
+---
+title: "Statistical basics and data visualization"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+---
+
+```{r setup}
+#| include: false
+
+library(tidyverse)
+library(palmerpenguins)
+library(ggdist)
+library(openxlsx)
+```
+
+## Brief review of "last" week 
+
+- You learned how to interact with R and RStudio
+- You learned about vectors 
+
+
+##
+
+::: callout-note
+## Learning objectives
+**At the end of this lesson you will:**
+
+-   Be able to use terminology that describes data and its components
+-   Explain why data visualization is important 
+-   Produce data visualizations
+-   Produce summary statistics
+:::
+
+
+```{r datasetup}
+#| include: false
+
+penguins <- penguins
+
+penguins <- penguins %>% 
+  mutate(size = ifelse(body_mass_g < 3550, "x-small", 
+                       ifelse(body_mass_g <4050, "small", 
+                              ifelse(body_mass_g <4750, "medium", 
+                                     "large"))))
+```
+
+## Penguins from `palmerpenguins`
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](images/penguins.png)
+:::
+
+::: {.column width="50%"}
+The dataset used to illustrate concepts today and through much of the course comes from the `palmerpenguins` library[^1], and records observations about penguins made from three islands in the Palmer archipelago in Antarctica.
+
+[^1]: Artwork by Allison Horst.
+
+:::
+
+::::
+
+
+## What does data look like?
+
+A *dataframe* is a data structure that shapes data into a 2 dimensional table of rows and columns
+
+The top row usually contains the names of the variables, and the data itself starts on the following row 
+
+
+```{r, echo = FALSE}
+
+head (penguins)
+
+```
+
+
+# Terminology to describe data
+
+## Within a dataframe 
+
+**Variable**: A quantity, quality, or property that can be measured (typically columns)
+
+**Observation**: A set of measurements made under similar conditions. Contains several values, each associated with a variable. 
+
+**Value**: The measurement that is recorded for a particular observation of a variable
+
+## Example
+
+In the `penguins` dataframe, what are some of the variables? Where would you find an observation? What is one example of a value?
+
+
+```{r, echo = F}
+head(penguins, 4)
+```
+
+## The concept of tidy data
+
+![](images/tidy-1.png)
+
+1. Each variable is a column
+2. Each observation is a row
+3. Each type of observational unit is a table/dataframe
+
+## Why you should record data in tidy formats
+
+- Easy to share with others 
+- Easy to manipulate
+- Easy to visualize and analyze 
+
+## Data wrangling
+
+**Data wrangling** is the process of both tidying data and pre-processing it (e.g. error checking, recoding) in order to make the analysis process easier.
+
+. . .
+
+We will spend some time dealing with this topic using `dplyr` next week. 
+
+
+# Dealing with variables 
+
+## A note about understanding variable types
+
+This is probably the most foundational concept in statistics, though it appears to be sometimes hard for students. 
+
+
+## Types of variables
+
+![](images/variable-types.png)
+
+## Numerical variables
+
+Variables whose values are numbers. They can be either:
+
+. . . 
+
+  - Continuous: a numerical value that can take an infinite number of real values given an interval. For example, height.
+
+. . . 
+
+  - Discrete: a numerical value that can only take a finite number of real values within a given interval. For example, a count of students in this class.
+  
+
+## Categorical variables 
+
+Variables whose values are characteristics that can't be measured by numbers. They can be either:
+
+. . . 
+
+  - Nominal: a categorical variable that describes a label or category without a natural order. For example, place of birth.
+
+. . . 
+
+  - Ordinal: a categorical variable that describes a label or category where there is a natural order between values. For example, educational achievement, or assessments of quality.
+  
+
+## A note on variable types
+
+```{r}
+#| include : false
+
+student <- c("A", "B", "C", "D", "E")
+assigned.group <- c(1, 1, 2, 3, 2)
+
+groups <- data.frame(student, assigned.group)
+```
+
+Be careful of variables coded with numbers! These can be categorical variables disguising as numerical variables.
+
+. . . 
+
+
+Take the following example dataframe: 
+
+
+```{r}
+head(groups)
+```
+
+## Recognizing different variable types
+
+Thesse variable are from the `penguins` dataframe. Turn to your neighbour and discuss - what type of variable is each of these?
+
+. . . 
+
+```{r, echo = FALSE}
+penguins %>% 
+  slice(1, 41, 201, 281, 321)%>% 
+  select(species, sex, body_mass_g, size)%>% 
+  head()
+
+```
+
+::: aside
+Note: R's vector classifications are not the same as variable types!
+:::
+
+
+## Recognizing different variable types
+
+These variables are from the `ToothGrowth` dataframe. This is an experimental dataset that tests the effects of vitamin C supplementation delivered by two mechanisms on tooth length in guinea pigs. What type of variable is each of these?
+
+. . . 
+
+```{r, echo = FALSE}
+data("ToothGrowth")
+
+ToothGrowth %>% 
+  slice_sample(n = 6)%>% 
+  rename(length = len, delivery_type = supp) %>%
+  head()
+
+```
+
+::: aside
+Note: R's vector classifications are not the same as variable types!
+:::
+
+## Some last thoughts on tidy data
+
+Learning how to parse out a dataset is a crucial skill that can be developed over time 
+
+. . . 
+
+Tidy data makes it easier for us to understand the structure of a new dataset. 
+
+. . . 
+
+Untidy data has its uses, but is generally used as a tool after the data collection phase
+
+
+# Working with objects in R
+
+## How R works: Functions and arguments
+
+Any operation you perform in R takes place through the use of a function
+
+. . . 
+
+<br>
+A function takes the following form: <br> function(argument1, argument2, argument3)
+
+. . . 
+
+<br>
+You can learn about functions and the arguments they required by using the `?` in the console, or searching the Help tab of the viewer.
+
+## Functions and arguments
+
+:::: {.columns}
+
+::: {.column width="30%"}
+
+When you created vectors previously, you were actually using a function called `c()`
+
+:::
+
+::: {.column width="70%"}
+
+![](images/c-help.png)
+:::
+
+::::
+
+## Functions and arguments 
+
+Other examples of functions we have used so far: `str()`, `data.frame()`
+
+. . . 
+
+From now on we will be making extensive use of functions - remember that you can always look up "how they work" with the `?` call.
+
+
+
+## Types of objects in R
+
+::: {.incremental}
+We will be working with three main types of objects in R:
+
+1. Vectors
+2. Dataframes
+3. Models
+:::
+
+## Working with objects in R
+
+```{r}
+#| include: false
+vec1 <- 1:4
+vec2 <- c("A", "B", "C", "D")
+```
+
+How do we look at at vectors and learn their types? Let's say we have two vectors called `vec1` and `vec2`. We want to know what type of vectors they are. Let's start by printing them:
+
+. . . 
+
+```{r}
+str(vec1)
+typeof(vec1)
+```
+
+. . . 
+
+```{r}
+str(vec2)
+typeof(vec2)
+```
+
+
+## Working with objects in R
+
+What type of vectors are they? We can use either the `typeof()` or `str()` functions to tell us:
+
+. . . 
+
+```{r}
+str(vec1)
+str(vec2)
+typeof(vec1)
+typeof(vec2)
+```
+
+## Converting between types of vectors
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+R handles 4 main types of vectors:
+
+  1. logical - `TRUE, FALSE`
+  2. integer - whole numbers
+  3. double/numeric - decimal numbers
+  4. character - most flexible type, alphanumeric
+
+::: 
+
+::: {.column width="40%"}
+
+![](images/vector-types.png)
+:::
+
+::::
+
+
+## Converting between vector types
+
+There are several functions for converting between types of vectors:
+
+  - `as.logical()`, can only take vectors of value 0, 1
+  - `as.integer()`, can only convert vectors and factors with whole number values
+  - `as.numeric()`, can take integer variables or logical vectors
+  - `as.character()`,  can take vectors logical, integer, or double
+
+## Converting between variable types
+
+`vec1` is of class integer. Let's say, however, that this variables really coding for some attribute that is measured in inches, and we want to be able to enter data that measured in half inch increments.
+
+. . . 
+
+We could convert the vector to a numeric variable with the `as.numeric()` function
+
+```{r}
+vec1numeric <- as.numeric(vec1)
+```
+
+## Converting between variable types
+
+In practice, R is pretty clever and will convert vectors when it needs to, so long as the vectors can be coerced to the new type. This is called implicit coercion.
+
+For example:
+
+. . . 
+
+```{r}
+typeof(vec1)
+vec3 <- vec1 + 1.5
+typeof(vec3)
+```
+
+## Converting between variable types
+
+`vec1` is of class integer. Let's say, however, that this vector actually codes for five different study groups. What type of variable would this be?
+
+. . . 
+
+We could convert it to a character vector:
+
+```{r}
+vec1char <- as.character(vec1)
+str(vec1char)
+```
+
+
+## A note on categorical vectors and factors
+
+Ordinal vectors, and categorical factors broadly, sometimes need to be handled as factors. Factors are coded as integers, with corresponding "levels" coding for the name of the category.
+
+. . . 
+
+```{r}
+vec1factor <- as.factor(vec1)
+str(vec1factor)
+```
+
+## A note on categorical vectors and factors
+
+Factors are a bit painful to deal with, so we will avoid spending too much time working with them unless absolutely necessary. 
+
+. . . 
+
+In practice, many functions will implicitly coerce character vectors into factors when needed. 
+
+<br> However, you should know what a factor is in case you get an error that mentions factors!
+
+
+## Dataframes
+
+Dataframes are a series of vectors of the same length, bound together to create a two dimensional object. Each vector within the dataframe has a name.
+
+<br><br> A dataframe is similar to a standard Excel spreadsheet 
+
+## Building a dataframe
+
+Let's say we wanted to combine our two vectors into a dataframe. We can do this with the `data.frame()` function. Let's also add a third column to our dataframe, and call it "df"
+
+```{r}
+df <- data.frame(column1 = vec1, 
+                 column2 = vec2, 
+                 column3 = c("blue", "green", "red", "yellow"))
+```
+
+. . . 
+
+```{r, echo = FALSE}
+head(df)
+```
+
+## Learning about a dataframe
+
+You often will want to quickly learn the structure of a dataframe. To do this, there are a few different options, e.g.:
+
+```{r}
+str(df)
+```
+. . . 
+
+```{r}
+head(df)
+```
+
+## Working with vectors within a dataframe
+
+You can refer to individual vectors within a dataframe using this standard syntax: `df$column.name`. 
+
+. . . 
+
+```{r}
+df$column1
+df$column1 + 1.5
+```
+
+. . . 
+
+<br>
+
+```{r}
+df$column3 <- df$column1 + 1.5
+df
+```
+
+
+# Your turn: Exercise 2 in Posit Cloud
+
+
+
+
+# Data visualization with `ggplot2`
+
+## The data science pipeline 
+
+![](images/data-science-pipeline.png)
+
+The data science pipeline, Wickham and Grolemund (R4DS)
+
+## Why visualize data? 
+
+1. To better understand the shape of your data
+2. To check and confirm that your tests are reliable
+3. To communicate findings
+
+## Visualization to understand 
+
+Even people who are highly comfortable with numbers can be misled by summary statistics such as means, standard deviations, etc.
+
+. . . 
+
+Distribution of body size of penguins between females and males
+
+. . . 
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+:::{.fragment}
+
+```{r, echo = FALSE}
+summary(penguins$body_mass_g[penguins$sex == "female"])
+summary(penguins$body_mass_g[penguins$sex == "male"])
+```
+:::
+
+:::
+
+::: {.column width="40%"}
+
+:::{.fragment}
+```{r, echo = FALSE}
+ggplot(subset(penguins, sex %in% c("male", "female")), aes(x = sex, y = body_mass_g, fill = sex))+
+  geom_boxplot()
+```
+
+::: 
+
+::: 
+
+::::
+
+
+## Anscombe's quartet 
+
+```{r}
+#| include: false
+anscombe <- anscombe
+
+a1 <- anscombe %>%
+  pivot_longer(x1:x4, names_to = "set", values_to = "x")%>%
+  select(set, x)%>%
+  mutate(set = str_extract(set, pattern = "[1-9]"))%>%
+  arrange(set)
+
+a2 <- anscombe %>%
+  pivot_longer(y1:y4, names_to = "set", values_to = "y")%>%
+  select(set, y)%>%
+  mutate(set = str_extract(set, pattern = "[1-9]"))%>%
+  arrange(set)
+
+anscombe_long <- cbind(a1, a2)
+
+anscombe_long <- anscombe_long[,-3]
+```
+
+Anscombe's quartet is a famous illustration of why data visualization is so key when we are trying to understand our data or confirm our models. 
+
+. . . 
+
+<br>
+
+The quartet consists of four sets of data that when modeled with linear regression yield the same slope and the same R2 (a metric that quantifies goodness of fit).
+
+
+## Anscombe's quartet 
+
+The four similar linear regressions can be plotted: 
+
+. . . 
+
+```{r}
+ggplot(anscombe_long, aes(x = x, y = y))+
+  geom_smooth(method = "lm",  se = FALSE)+
+  facet_wrap(set~.)+ theme_bw()
+```
+
+## Anscombe's quartet 
+
+However, plotting the underlying data reveals a problem: 
+
+. . . 
+
+```{r}
+ggplot(anscombe_long, aes(x = x, y = y))+
+  geom_smooth(method = "lm", se = FALSE)+  geom_point()+
+  facet_wrap(set~.)+theme_bw()
+```
+
+## Anscombe's quartet
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+Anscombe's quartet is a reminder that although statistics are useful for summarizing data and conveying results, they can also be misleading if we are not careful.
+
+::: 
+
+::: {.column width="60%"}
+```{r, echo = FALSE}
+ggplot(anscombe_long, aes(x = x, y = y))+
+  geom_smooth(method = "lm", se = FALSE)+  geom_point()+
+  facet_wrap(set~.)+theme_bw()
+```
+:::
+
+::::
+
+## 
+
+::: callout-important
+## Choosing the correct visualization is important! 
+
+-   Effective visualizations support claims in easy to understand ways
+-   Strong skills in selecting and producing visualizations make analysis easier
+-   Some students struggle with this, but it is super important
+-   Selecting the appropriate visualization has to do with variable types
+-   Making good graphics takes practice
+
+:::
+
+
+## Types of data visualization 
+
+Appropriate data visualizations vary based on the type of variables that you are trying to display
+
+. . . 
+
+For a helpful cheatsheet on the types of plots you could use to display various types of data, see the "Cheatsheet" tab of Posit. I've uploaded this graphic to Brightspace as well. 
+
+. . . 
+
+The main visualization types we will use are: scatterplots, boxplots/violin plots, barplots, histograms, but there are lot of other options available to you.
+
+
+## Conceptualizing plots
+
+<br> Every plot needs an x and y axis, and you should know what you want to show in both axes
+
+<br> Many programming languages have defaults for some plots that mean you don't have to specify the y-axis for some types of plots
+
+## A reminder of the data structure
+
+```{r}
+head(penguins)
+```
+
+## Bar plots: a single discrete variable
+
+What is on the x axis? What is on the y axis?
+
+```{r, echo = FALSE}
+ggplot(penguins, aes(x = island, fill = island))+ 
+  geom_bar(width = 0.7)+
+  theme_minimal()+
+  scale_fill_manual(values = c("darkorange","darkorchid","cyan4"), 
+                    guide = "none")
+  
+```
+
+## Histograms: a single continuous variable
+
+What is on the x axis? What is on the y axis?
+
+```{r, echo = FALSE }
+ggplot(penguins, aes(x = flipper_length_mm))+ 
+  geom_histogram(binwidth = 5, fill = "cyan4")+
+  theme_minimal()
+  
+```
+
+
+## Scatterplots: two continuous variables
+
+What is on the x axis? What is on the y axis?
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()+
+  theme_classic()
+```
+
+## Scatterplots: two continuous variables
+
+We can add a third grouping variable by assigning an attribute to the points themselves, e.g. shape or color
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(col = species, shape = species))+
+  theme_classic()
+```
+
+
+## Box plots: one continuous and one discrete variable
+ 
+What is on the x axis? What is on the y axis?
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = species, y = body_mass_g)) +
+  geom_boxplot(aes(fill = species))+
+  theme_classic()
+```
+
+
+## Violin plots: improving on the box plot
+
+Violin plots show the density distribution of the underlying data
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = species, y = body_mass_g)) +
+  geom_violin(aes(fill = species))+
+  geom_boxplot(width = 0.3, alpha = 0.7)+
+  theme_classic()
+```
+
+## Raincloud plots: improving on the violin plot
+
+Raincloud plots show the density distribution of the underlying data and the underlying data itself!
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = species, y = body_mass_g, fill = species, col = species)) +
+  stat_halfeye(adjust = 0.5, justification = -0.2, .width = 0, point_color = NA)+
+  geom_boxplot(width = 0.12, alpha = 0.7, outlier.color = NA, col = "black")+
+  stat_dots(side = "left",justification = 1.1, binwidth = 25)+
+  theme_classic()
+```
+
+## `ggplot2` - a grammar of graphics
+
+We're going to use the library `ggplot2` to do all of our plotting in this course.
+
+
+<br> `ggplot2` is written following data visualization principles laid out in *The Grammar of Graphics* 
+
+. . . 
+
+<br> What this means for you is that `ggplot2` and all its extensions use internally consistent syntax, and you only need to do a few things to get a great plot.
+
+
+## `ggplot2` - a grammar of graphics
+
+:::{.incremental}
+Steps to creating a plot using `ggplot2`:
+
+  1. Supply the data
+  2. Supply the aesthetics (which variables, which groups)
+  3. Specify the type(s) of visualization (geometries)
+  4. Additional functions to modify and adjust the plot
+:::
+
+## Example 
+
+```{r}
+ggplot(data = penguins, 
+       mapping = aes(x = body_mass_g, y = bill_length_mm))+
+  geom_point()+
+  geom_smooth(method = "lm")
+```
+
+## Example
+
+
+```{r}
+ggplot(data = penguins, 
+       mapping = aes(x = body_mass_g, y = bill_length_mm))
+
+```
+
+## Example
+
+```{r}
+#| code-line-numbers: "3"
+ggplot(data = penguins, 
+       mapping = aes(x = body_mass_g, y = bill_length_mm))+
+  geom_point()
+```
+
+## Example 
+
+```{r}
+#| code-line-numbers: "4"
+ggplot(data = penguins, 
+       mapping = aes(x = body_mass_g, y = bill_length_mm))+
+  geom_point()+
+  geom_smooth(method = "lm")
+```
+
+## Specifying groups in different geometries
+
+```{r}
+#| code-line-numbers: "3"
+ggplot(data = penguins, 
+       mapping = aes(x = body_mass_g, y = bill_length_mm))+
+  geom_point(aes(color = species))+
+  geom_smooth(method = "lm")
+```
+
+## Specifying groups in different geometries
+
+```{r}
+#| code-line-numbers: "4"
+ggplot(data = penguins, 
+       mapping = aes(x = body_mass_g, y = bill_length_mm))+
+  geom_point()+
+  geom_smooth(aes(color = species), method = "lm")
+```
+
+## Specifying groups across all geometries
+
+```{r}
+#| code-line-numbers: "2"
+ggplot(data = penguins, 
+       mapping = aes(x = body_mass_g, y = bill_length_mm, color = species))+
+  geom_point()+
+  geom_smooth(method = "lm")
+```
+
+## Setting options in/out of `aes()`
+
+```{r}
+#| code-line-numbers: "3,4"
+ggplot(data = penguins, 
+       mapping = aes(x = body_mass_g, y = bill_length_mm, color = species))+
+  geom_point(shape = 1)+
+  geom_smooth(aes(lty = species), method = "lm")
+```
+
+## Adding titles and axis labels
+
+```{r}
+#| code-line-numbers: "4,5,6"
+ggplot(data = penguins, 
+       mapping = aes(x = body_mass_g, y = bill_length_mm))+
+  geom_point(aes(col = species))+
+  labs(title = "Relationship between body mass and bill length in penguins", 
+       x = "Body mass (in grams)", 
+       y = "Bill length (in mm)")
+
+```
+
+## Commonly used geometries
+
+Here are the ones you most commonly will use:
+
+- Bar plots: `geom_bar()`, needs an x variable
+- Histograms: `geom_histogram()`, needs an x variable
+- Scatter plots: `geom_point()`, needs x and y variables
+- Box plots: `geom_boxplot()`, needs x and y variables
+
+You can endlessly customize your plots, refer to cheatsheets or to the cook book for help!
+
+# Your turn - Exercise 2
+
+
+
+# 1. Working with data frames 
+
+```{r, include = FALSE}
+library(palmerpenguins)
+penguins <- penguins
+```
+
+## Introducing `dplyr`
+
+::::{.columns}
+
+:::{.column width="60%"}
+![](images/dplyr_wrangling.png)
+::: 
+
+:::{.column width="40%"}
+
+`dplyr` is a package within the `tidyverse` whose purpose is to help us wrangle data - that is reshape and manipulate it
+
+:::
+
+::::
+
+
+::: aside
+
+Artwork by [Allison Horst](https://allisonhorst.com/data-science-art)
+
+::: 
+
+## Introducing `dplyr`
+
+The main functions we will introduce today from `dplyr` are: 
+
+  - `filter()` 
+  - `select()`
+  - `mutate()`
+  - `rename()`
+  
+## Introducing `dplyr`
+
+All of the functions in this package share a few commonalities:
+
+  - The first argument is a data frame type object (data frame or tibble)
+  - Subsequent arguments describe what to do with the data frame. You can refer to columns directly by name without $ operator
+  - The result returns a new data frame 
+  - Data frames must be in tidy format to take full advantage of dplyr
+  
+## Accessing dataframe elements with `$`
+
+Each dataframe is composed of vectors. These are technically elements of the dataframe. 
+
+```{r}
+str(penguins)
+```
+
+## Accessing dataframe elements with `$`
+
+In order to access an element of a dataframe (a vector), you can use the `$` operator to specify it by name
+
+```{r}
+penguins$bill_length_mm %>% head(30)
+
+penguins$species %>% head(30)
+```
+
+## Accessing dataframe elements with `$`
+
+You can perform operations on a vector from a dataframe just as you would on any other vector:
+
+```{r}
+bill_length_cm <- penguins$bill_length_mm/10
+
+head(bill_length_cm, 30)
+```
+
+## Accessing dataframe elements with `$`
+
+You can also define a new variable in a dataframe using the `$` and `<-` operators
+
+```{r}
+penguins$bill_length_cm <- penguins$bill_length_mm/10
+
+colnames(penguins)
+```
+
+## Logical operators for subsetting
+
+Here are the logical operators you should commit to memory:
+
+  - `==` - Equals 
+  - `!=` - Does not equal
+  - `>` and `>=` - Greater than and Greater than or equal to
+  - `<` and `<=` - Less than and Less than or equal to
+  - `%in%` - Included in (followed by a vector)
+  - `is.na()` - Is a missing value
+  - `&` and `|` - And ; Or, for stringing multiple criteria
+
+
+## Selecting columns with `select()`
+
+Sometimes with large datasets, or when manipulating columns you want to select only certain columns to keep. `select()` is a very useful way to do this.
+
+```{r}
+select(penguins, species, year)
+```
+
+## Selecting columns with `select()`
+
+We can select multiple consecutive columns with `:`, which will keep all columns starting with the first specified and ending with the second specified. 
+
+```{r}
+select(penguins, species:bill_length_mm, year)
+```
+
+## Selecting columns with `select()`
+
+We can select also pair select with helper functions such as `starts_with()`, `ends_with()`, `contains()`, `matches()` 
+
+```{r}
+select(penguins, ends_with("_mm"))
+```
+
+## Selecting columns with `select()`
+
+We can also "negatively select," in the sense that we can get rid of columns while keeping the rest by prefacing our selection arguments with a `-` sign: 
+
+```{r}
+select(penguins, -ends_with("_mm"))
+```
+
+## Subsetting columns with `select()` rather than indexing
+
+It is possible to select columns with indexing, as we did with vectors e.g. `penguins[,1:3]` returns columns 1-3.
+
+. . . 
+
+This is not great practice. If we were to change the ordering of the columns, either through uploading a new dataset or by changing a data management step, we would have to revisit our indexing.
+
+
+## Filtering a dataset with `filter()`
+
+![](images/filter-horst.png)
+
+::: aside
+
+Artwork by [Allison Horst](https://allisonhorst.com/data-science-art)
+
+::: 
+
+## Filtering a dataset with `filter()`
+
+We can filter for multiple values in one call 
+
+```{r}
+filter(penguins, species == "Adelie" & year != 2007)
+```
+
+## Filtering a dataset with `filter()`
+
+To filter for missing values (`NA`) use `is.na()` or `!is.na()`
+
+```{r}
+filter(penguins, is.na(flipper_length_mm))
+```
+
+## Filtering a dataset with `filter()`
+
+To filter for multiple values of a variable, use `|` or `%in%`
+
+```{r}
+filter(penguins, species == "Adelie" | species == "Gentoo")
+```
+
+## Filtering a dataset with `filter()`
+
+To filter for multiple values of a variable, use `|` or `%in%`
+
+```{r}
+filter(penguins, species %in% c("Adelie", "Gentoo"))
+```
+
+## Filtering a dataset with `filter()`
+
+To filter for multiple values of a variable, use `|` or `%in%`
+
+```{r}
+targetspecies <- c("Adelie", "Gentoo")
+filter(penguins, species %in% targetspecies)
+```
+
+
+## Renaming columns with `rename()`
+
+Renaming columns is a breeze, using the sytax `new = old`. This is so much better than having to use `colnames()` and indexing!
+
+```{r}
+rename(penguins, bill.l = bill_length_mm, flip.l = flipper_length_mm)
+```
+
+## Adding new columns with `mutate()`
+
+::::{.columns}
+
+:::{.column width="50%"}
+![](images/mutate_horst.png)
+
+::: 
+
+:::{.column width="50%"}
+
+`mutate()` allows us to add new columns to our dataset. It's especially useful for defining new columns as a computation of other columns.  
+
+:::
+
+::::
+
+
+::: aside
+
+Artwork by [Allison Horst](https://allisonhorst.com/data-science-art)
+
+::: 
+
+## Adding new columns with `mutate()`
+
+```{r}
+mutate(penguins, bill_length_mm = bill_length_cm/10)
+```
+
+
+## Adding new columns with `mutate()`
+
+Let's add a column called `cute`, which is coded "yes" if bill length < 35mm, and "no" if bill length >= 35mm 
+
+```{r}
+mutate(penguins, cute = ifelse(bill_length_mm < 35, "Yes", "No"))
+```
+
+## Adding new columns with `mutate()`
+
+Let's add a column that calculates the z-score for bill length - this can be done in one line, but let's do it in two to illustrate that we can call on new variables within a mutate call:
+
+```{r}
+mutate(penguins, 
+       bill_length_z = bill_length_mm - mean(bill_length_mm, na.rm = TRUE), 
+       bill_length_z = bill_length_z/ sd(bill_length_mm, na.rm = TRUE))   %>% select(species, island, bill_length_mm, bill_length_z)
+```
+
+## The pipe operator `%>%`
+
+:::: {.columns}
+
+:::{.column width="60%"}
+
+Often times, we want to string together multiple operations. The pipe operator allows us to do that. <br><br>
+
+Kind of like a `ggplot2` layers, the pipe inherits the data from the previous operation and passes it on to the next.
+
+:::
+
+:::{.column width="40%"}
+
+![](images/pipe-puppies.jpeg)
+
+::: aside
+
+Artwork by [Allison Horst](https://allisonhorst.com/data-science-art)
+
+:::  
+
+:::
+
+::::
+
+
+## A few `%>%` example
+
+When we want to use a pipe, we move the name of the dataframe out of the function:
+
+```{r}
+penguins %>% 
+  mutate(bill_length_cm = bill_length_mm/10)%>%
+  filter(species == "Gentoo")%>% 
+  select(island, sex, bill_length_cm)
+```
+
+## A few `%>%` example
+
+We can also string `dplyr` pipes with `ggplot2`
+
+```{r}
+penguins %>% 
+  filter(species %in% c("Gentoo", "Chinstrap"))%>%
+  ggplot(aes(x = body_mass_g, y = bill_length_mm))+ # note we use + 
+    geom_point(aes(col = species))+
+    geom_smooth(method = "lm", se = FALSE)
+```
+
+## Other useful functions 
+
+We're not going to cover these in detail, but they are pretty useful and you may need to refer to them later:
+
+  - `relocate()` for moving columns relative to others within a dataframe
+  - `arrange()` for sorting by values in a column
+
+
+
+## Summarizing 
+
+Last week, we produced summaries with base R functions for quick assessment of individual groups. We also used `table1` to make nicely formatted tables summarizing multiple variables.
+
+. . . 
+
+There is one more use for summarizing data that is super useful for data analysis: summarizing across groups.
+
+## Summarizing across groups
+
+```{r, include = FALSE}
+child <- read.xlsx("data/child-loop-long.xlsx")
+```
+
+This can be very useful when we want to produce summary statistics for different groups, or even better, when we want to derive new variables for use in future analyses. 
+
+. . . 
+
+For example, in this dataset, you might want to count the number of children born to each woman
+
+```{r, echo = FALSE}
+child %>% filter(!is.na(age))%>% head()
+```
+
+## Summarizing across groups 
+
+You can achieve this with `group_by()`and `summarize()` like so:
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r, echo = FALSE}
+child %>% filter(!is.na(age))%>% select(id, child) %>% head(10)
+```
+
+:::
+
+:::{.column width="50%"}
+
+```{r}
+child %>% 
+  filter(!is.na(age))%>%
+  group_by(id)%>%
+  summarize(n_kids = n())
+```
+
+:::
+
+::::
+
+## Summarizing across groups 
+
+You can also produce lots of other summary statistics: 
+
+```{r}
+penguins %>% 
+  group_by(species)%>%
+  summarize(n = n(), 
+            mean_bill_l = mean(bill_length_mm, na.rm = TRUE), 
+            sd_bill_l = sd(bill_length_mm, na.rm = TRUE))
+```
+
+
+

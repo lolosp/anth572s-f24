@@ -1,0 +1,71 @@
+---
+title: "Joining and pivoting datasets"
+author: "Answer key"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## 2. Pivoting
+
+For this exercise, You will use the following datasets, which live in the `tidyverse` library, and are a bit messy: 
+
+```{r}
+table4b <- table4b
+table4a <- table4a
+```
+
+`table4a` contains counts of cases for 1999 and 2000 across several countries. `table4b` contains population values for 1999 and 2000 across several countries 
+
+#### Q2.1. Have a look at both datasets. 
+
+```{r}
+head(table4a) # cases of tuberculosis recorded
+head(table4b) # population
+```
+
+#### Q2.2. Which are the columns that should be pivoted longer?
+
+*The years - we want this dataset to look more like the gapminder dataset we have been workig with!*
+
+#### Q2.3. Pivot the tables longer, and save them as `table4a` and `table4b` (overwrite the old versions)
+
+```{r}
+table4a <- table4a %>% 
+  pivot_longer(cols = "1999":"2000", names_to = "year", values_to = "tb.cases")
+
+table4b <- table4b %>% 
+  pivot_longer(cols = "1999":"2000", names_to = "year", values_to = "population")
+
+```
+
+
+## 3. Joining 
+
+Now, let's plan to join the two datasets that were pivoted longer: `table4a` and `table4b`. 
+
+#### Q3.1. Let's start be identifying the columns that are shared. Visualize the structure of both dataframes, then list the columns that are repeated: 
+
+*The columns that are shared are country and year*
+
+```{r}
+str(table4a)
+str(table4b)
+```
+
+#### Q3.2. Given the columns that overlap between the datasets, what kind of join would be appropriate? If you are choosing `left_join()` or `right_join()`, specify which dataframe is on the right or left. 
+
+*A full join would be best as you want to keep all cases. If you were sure that all countries were in both datasets you could use a left or right join as well, which would in practice be the same as a full join*
+
+
+#### Q3.3. Perform the join, specifying column(s) to join by, and save the resulting dataframe as a new object. Print the new dataframe to check your work.
+
+```{r}
+tb <- full_join(table4a, table4b, by = c("country", "year"))
+tb
+```
+

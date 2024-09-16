@@ -1,0 +1,70 @@
+---
+title: "Summarizing across groups"
+author: "Answer key"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## 1. Summarizing by groups 
+
+For this, we will work with the Ache dataset again. It's available as a .csv in your working directory. Load it with the `read.csv()` function and save it as `ache`
+
+```{r}
+ache <- read.csv("ache-hunting.csv")
+```
+
+If you don't remember what the data looks like, go ahead and insert a code chunk and look at the structure of the data. 
+
+```{r}
+str(ache)
+
+```
+
+#### Q1.1.  Produce the summary statistics for `ache$age`. We're going to use these to break the ages into four roughly equal groups, so make sure to use the median and quartiles. You can compute the quartiles with `quantile()`, specifying the 0.25 and 0.75 probabilities.
+
+```{r}
+median(ache$age)
+quantile(ache$age, c(0.25, 0.5, 0.75))
+```
+
+#### Q1.2 Use the computed Q1, median and Q3 values, combined with `mutate()` and an `ifelse()` statement to compute a new variable called "agegroup" with the levels: 1, 2, 3, 4. Go ahead and save the resulting dataframe as `ache`.
+
+*Note -- see exercise 1 for this week to refresh your nested `ifelse()` skills*
+
+```{r}
+
+ache <- ache %>% 
+  mutate(agegroup = ifelse(age < 35, 1, #note: this creates a numeric variable
+                           ifelse(age < 47, 2, 
+                                  ifelse(age < 57, 3, 4))))
+
+```
+
+#### Q1.3. Based on our previous knowledge of the returns from Ache hunts (assignment 1 is due soon!), we know that a lot of hunts are unsuccessful. But of the hunts that are successful, is there any difference between age groups in average meat return? Make sure to also produce standard deviations!
+Hint: Use `group_by()` and `summarise()`
+
+```{r}
+
+ache %>% 
+  filter(kg.meat > 0 )%>% # select out only hunts that are successful!
+  group_by(agegroup)%>% 
+  summarise(mean = mean(kg.meat), 
+            sd = sd(kg.meat))
+
+```
+
+#### Q1.4. Is there any difference in yield per hunt between the age groups when we exclude the hunts that are unsuccessful? Produce a plot to demonstrate the summary statistics you produced in Q1.3. Make sure to color your plot by age group and add informative labels on the title and axes.
+
+```{r}
+ache %>% 
+  filter(kg.meat >0)%>% 
+  ggplot(aes(x = factor(agegroup), y = kg.meat, col = factor(agegroup)))+ #if you created a character vector you do not need to coerce to factor (but it will work!)
+  geom_boxplot()
+
+```
+

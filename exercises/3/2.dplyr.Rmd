@@ -1,0 +1,155 @@
+---
+title: "Working with dataframes"
+author: "Your-name-here"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Set up
+
+In this exercise, we're going to use how to manipulate dataframes using a dataset on air pollution in Chicago. You'll want to load the `tidyverse` package, then read in the air pollution data from the .csv file contained in the project. This is a new way to load data for you, so I'll write the code for reading in the data. Note the code though! This is likely an operation you'll repeat.
+
+```{r}
+library(tidyverse)
+chicago <- read.csv("chicago-air-pollution.csv")
+```
+
+## 1. Get familiar with the dataframe
+
+Take some time to familiarize yourself with the dataset. The data contain information on the concentration of different pollutants  
+
+#### Q1.1. Examine the structure and print the first few rows of the dataframe. What do you think is the unit of observation for this particular dataset?
+
+```{r}
+
+
+```
+
+## 2. Using `select()`
+
+#### Q2.1. The only value contained by the `city` column is "chic" for Chicago, so this column is not informative. Use `select()` to remove it from the dataframe, and save your results as `chicago`. This will overwrite the original dataframe.
+
+```{r}
+--- <- select(chicago, --- )
+```
+
+#### Q2.1. Say you only wanted to keep the last four variables, which code for the recorded values of four types of pollutants. All four variables end in "mean2". Write a statement combining `select()` with a helper function to recognize that pattern in the name. 
+Hint: you're looking for one of these - `starts_with()`, `ends_with()`, `contains()`, `matches()` 
+
+```{r}
+select(---, ---)
+```
+
+## 3. Using `filter()`
+
+PM2.5 levels are considered little to no risk if they are below 12 micrograms/m^3. They are considered unhealthy and can start causing issues for people with breathing problems if they are above 35. 
+
+#### Q3.1. Use filter to create a subset of the `chicago` data that keeps all the observations for which PM2.5 levels are below 12. Then, use a pipe to count the number of rows contained in this new dataset
+Hint: you can use either `nrow()` or `count()` for this
+
+```{r}
+filter(---, --- < 12) %>% count()
+```
+
+#### Q3.2. Now create a subset of the `chicago` data that keeps all the observations for which PM2.5 levels are at or above 35. Use a pipe to count the number of rows contained in this new dataset. During the observation period, has Chicago experience more days where the PM2.5 was normal or days where it was likely to begin causing breathing difficulties?
+
+```{r}
+--- %>% 
+  filter(--- 35)%>% 
+  ---()
+```
+
+
+#### Q3.3. Filter out all observations where PM2.5 values are missing. Then filter out observations where `tmpd`, a variable that records daily average temperature, is also missing. Then, use `ggplot2` to plot the relationship between daily average temperature (x-axis) and PM2.5 (y-axis), adding a fitted line if needed. Is there a relationship between the two?
+
+Hint: you'll need `is.na()`, `!`, and `%>%` for this!
+
+```{r}
+chicago %>% 
+  filter(!is.na(---))%>% 
+  filter(---)%>%
+  ggplot(----)+ 
+    geom_--()
+```
+
+## 4. Using `rename()`
+
+Having now worked with the variables a little, you can see that the names are not user friendly. 
+
+#### Q4.1. Replace the names for the following variables with something that sound better to you. Then save the dataset with the object name `chicago`, overwriting it.
+
+  - `tmpd` - A variable coding for temperature
+  - `dptp` - A variable coding for dewpoint
+  - `pm25tmean2` - A variable coding for the concentration of PM2.5
+  - `pm10tmean2` - A variable coding for the concentration of PM2.5
+  
+```{r}
+chicago %>% 
+  rename(--- = ---, # naming syntax: newvar = oldvar
+          --- = ---  )
+
+```
+
+## 5. Using `mutate()`
+
+#### Q5.1. Create a new variable called `pm2.5_rel` with three levels (low, medium, and high) that codes three levels of PM2.5 concentration: <12, 12-35, and >= 35. 
+
+Hint: Use `ifelse()` statements. You can nest one within the other. Note that if the first `ifelse()` condition is met, the operation for `TRUE` is applied and  the next value is evaluated against the `ifelse()` statements. 
+
+```{r}
+
+--- %>% 
+  mutate(pm2.5_rel = ifelse(--- < 12, ---, #ifelse1
+                            ifelse(--- < -- , -- , -- )) #ifelse2
+         )
+
+```
+
+#### Q5.2. What kind of variable did you create in question 5.1?
+
+
+
+
+## 2. Summarizing by groups 
+
+For this section of the exercise, we will work with the Ache dataset again. It's available as a .csv in your working directory. Load it with the `read.csv()` function and save it as `ache`
+
+```{r}
+ache <- read.csv("ache-hunting.csv")
+```
+
+If you don't remember what the data looks like, go ahead and insert a code chunk and look at the structure of the data. 
+
+#### Q1.1.  Produce the summary statistics for `ache$age`. We're going to use these to break the ages into four roughly equal groups, so make sure to use the median and quartiles. You can compute the quartiles with `quantile()`, specifying the 0.25 and 0.75 probabilities.
+
+```{r}
+
+```
+
+#### Q1.2 Use the computed Q1, median and Q3 values, combined with `mutate()` and an `ifelse()` statement to compute a new variable called "agegroup" with the levels: 1, 2, 3, 4. Go ahead and save the resulting dataframe as `ache`.
+
+```{r}
+
+```
+
+#### Q1.3. Based on our previous knowledge of the returns from Ache hunts (assignment 1 is due soon!), we know that a lot of hunts are unsuccessful. But of the hunts that are successful, is there any difference between age groups in average meat return? Make sure to also produce standard deviations!
+Hint: Use `group_by()` and `summarise()`
+
+```{r}
+
+```
+
+#### Q1.4. Is there any difference in yield per hunt between the age groups when we exclude the hunts that are unsuccessful? Produce a plot to demonstrate the summary statistics you produced in Q1.3. Make sure to color your plot by age group and add informative labels on the title and axes.
+
+```{r}
+
+```
+
+
+## Attribution
+
+This first half of this exercise was inspired by [RD Peng's Biostatistics lectures](https://rdpeng.github.io/Biostat776/lecture-managing-data-frames-with-the-tidyverse.html#select)

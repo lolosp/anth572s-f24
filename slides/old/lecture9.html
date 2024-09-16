@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="lecture9_files/libs/clipboard/clipboard.min.js"></script>
+<script src="lecture9_files/libs/quarto-html/tabby.min.js"></script>
+<script src="lecture9_files/libs/quarto-html/popper.min.js"></script>
+<script src="lecture9_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="lecture9_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="lecture9_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="lecture9_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="lecture9_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.3.353">
+
+  <meta name="author" content="Laure Spake">
+  <title>Relationships between variables 2</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="lecture9_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="lecture9_files/libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="lecture9_files/libs/revealjs/dist/theme/quarto.css">
+  <link href="lecture9_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="lecture9_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="lecture9_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="lecture9_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    margin-bottom: 0.5rem;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Relationships between variables 2</h1>
+  <p class="subtitle">ANTH 572S</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Laure Spake 
+</div>
+</div>
+</div>
+
+</section>
+<section>
+<section id="term-project" class="title-slide slide level1 center">
+<h1>Term project</h1>
+
+</section>
+<section id="goal-of-the-project" class="slide level2">
+<h2>Goal of the project</h2>
+<div>
+<p>Give you experience:</p>
+<ul>
+<li class="fragment">Formulating research questions and hypotheses</li>
+<li class="fragment">Supporting/situating these questions with literature review</li>
+<li class="fragment">Testing your hypotheses with statistical tests</li>
+<li class="fragment">Reflecting on what your statistical results mean about your question of interest</li>
+</ul>
+</div>
+</section>
+<section id="how" class="slide level2">
+<h2>How ?</h2>
+<p>You will identify a dataset (Zenodo, other data repository, or I can help you with options)</p>
+<p>You will decide on a topic and come up with two specific questions/hypotheses</p>
+<p>You will test these hypotheses, write a report outlining your results, and present your findings in a research poster format</p>
+</section>
+<section id="project-components" class="slide level2">
+<h2>Project components</h2>
+<div>
+<ol type="1">
+<li class="fragment">Pre-registration - 20% - due April 5th (note: pushed back)</li>
+<li class="fragment">Report - 60% - due May 3rd</li>
+<li class="fragment">Presentation - 20% - May 8th, due May 3rd</li>
+</ol>
+</div>
+</section>
+<section id="pre-registration" class="slide level2">
+<h2>Pre-registration</h2>
+<p>Think of this as an analysis plan. You should include:</p>
+<ul>
+<li>Your topic and specific questions</li>
+<li>A brief synthetic literature review (10-15 papers, not more than 1 page)</li>
+<li>The dataset you will use (subset if applicable)</li>
+<li>The tests you plan to use for each research question</li>
+</ul>
+<p><br> Due April 5th</p>
+</section>
+<section id="synthetic-literature-review" class="slide level2">
+<h2>Synthetic literature review</h2>
+<p>This does not have to be exhaustive, but in order to formulate a good research question, you must have some knowledge about your variables of interest and/or the study context</p>
+<p><br> You should cite 10-15 sources, and write no more than 500 words/1 page of literature review</p>
+</section>
+<section id="report-sections" class="slide level2">
+<h2>Report sections</h2>
+<div>
+<ol type="1">
+<li class="fragment">Introduction
+<ul>
+<li class="fragment">Lit review and RQs</li>
+</ul></li>
+<li class="fragment">Research questions 1-2
+<ul>
+<li class="fragment">Data viz, descriptive stats, formal test, conclusion on your RQ</li>
+</ul></li>
+<li class="fragment">Discussion/Conclusion
+<ul>
+<li class="fragment">What have you revealed about your topic?</li>
+</ul></li>
+<li class="fragment">References cited</li>
+</ol>
+</div>
+</section>
+<section id="formatting-references" class="slide level2">
+<h2>Formatting references</h2>
+<p>You can use any reference formatting style, but it should be consistent across references and should provide all necessary information.</p>
+<div class="fragment">
+<p><br> Spake L. 2022. Article Title. <em>Journal Title</em> 3:400-411. DOI: doi.org/10.1002/doi.</p>
+<p>Spake L. 2022. <em>Book Title</em>. Publisher: City.</p>
+<p>Spake L. 2002. Chapter Title. In: Spake L (ed). <em>Book Title</em>. Publisher: City. p.400-411.</p>
+</div>
+</section>
+<section id="poster" class="slide level2">
+<h2>Poster</h2>
+<p>Due May 3rd. Those posters coming in after that day may not get printed in time.</p>
+<div class="fragment">
+<p>See Brightspace for examples and resources. You can also see lots of example posters in the Anthropology hallways, downstairs and upstairs.</p>
+</div>
+</section></section>
+<section id="questions" class="title-slide slide level1 center">
+<h1>Questions?</h1>
+<p>A PDF version of these guidelines will go up on Brightspace v soon.</p>
+</section>
+
+<section>
+<section id="odds-and-odds-ratios" class="title-slide slide level1 center">
+<h1>Odds and odds ratios</h1>
+
+</section>
+<section id="moving-beyond-continuously-distributed-outcomes" class="slide level2">
+<h2>Moving beyond continuously distributed outcomes</h2>
+</section>
+<section id="what-are-odds" class="slide level2">
+<h2>What are odds?</h2>
+<p>Odds present the chance of an outcome.</p>
+<p><br> Where the probability of an event is given as the number of successes divided by the number of potential events, odds are typically presented as a ratio of success to non-successes.</p>
+<div class="fragment">
+<p><br> Chance of rolling a 1 on a normal die:</p>
+<p>probability = 1/6 or 0.1666667; odds = 1/5 or 0.2</p>
+</div>
+</section>
+<section id="what-are-odds-1" class="slide level2">
+<h2>What are odds?</h2>
+<p>It’s always possible to convert between odds and probability.</p>
+<div class="fragment">
+<p><br> You can obtain the odds of an event from the probability with <span class="math inline">\(prob = \frac{odds}{1+odds}\)</span></p>
+</div>
+<div class="fragment">
+<p><br>In the dice rolling example, odds of rolling a 1 were 1/5. Therefore, <span class="math inline">\(prob = \frac{1/5}{1+(1/5)}\)</span> or 0.1666667</p>
+</div>
+</section>
+<section id="what-are-odds-2" class="slide level2">
+<h2>What are odds?</h2>
+<p>It’s always possible to convert between odds and probability.</p>
+<div class="fragment">
+<p><br> You can obtain the probability of an event from the odds with <span class="math inline">\(odds = \frac{p}{1-p}\)</span></p>
+</div>
+<div class="fragment">
+<p><br>In the dice rolling example, probability of rolling a 1 was 1/6. Therefore, <span class="math inline">\(odds = \frac{1/6}{1-(1/6)}\)</span> or 0.2</p>
+</div>
+</section>
+<section id="odds-ratios" class="slide level2">
+<h2>Odds ratios</h2>
+<p>Odds ratios (ORs) express how likely an outcome is in one group relative to another group. ORs are routinely used in epidemiology and health research.</p>
+</section>
+<section id="calculating-odds-ratios" class="slide level2">
+<h2>Calculating odds ratios</h2>
+<p>Let’s say we have ~400 participants who participated in an epidemiological study of diabetes. For each participant we know whether or not they have elevated diastolic blood pressure, and whether or not they develop diabetes.</p>
+<div class="fragment">
+<p><img data-src="images/OR-formula.jpeg"></p>
+</div>
+</section>
+<section id="calculating-odds-ratios-1" class="slide level2">
+<h2>Calculating odds ratios</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">table</span>(diabetes<span class="sc">$</span>bp, diabetes<span class="sc">$</span>outcome)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   
+      0   1
+  0 258 123
+  1   4   7</code></pre>
+</div>
+</div>
+<div class="fragment">
+<p>OR = (Yes/Yes * No/No)/(Yes/No * No/Yes)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>(<span class="dv">258</span><span class="sc">*</span><span class="dv">7</span>)<span class="sc">/</span>(<span class="dv">4</span><span class="sc">*</span><span class="dv">123</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.670732</code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<p>Interpretation: For individuals with elevated diastolic BP, the odds of developing diabetes are 3.67 times the odds for those without elevated diastolic BP, or a 267% increase in the odds</p>
+</div>
+</section>
+<section id="conditions-in-which-the-or-can-be-calculated" class="slide level2">
+<h2>Conditions in which the OR can be calculated</h2>
+<p>When you have a single categorical predictor, ideally with only two levels</p>
+<div class="fragment">
+<p>You can’t use this formula to calculate an OR with a continuous predictor, or while controlling for the effect of other variables</p>
+</div>
+</section></section>
+<section>
+<section id="logistic-regression" class="title-slide slide level1 center">
+<h1>Logistic regression</h1>
+
+</section>
+<section id="logistic-regression-1" class="slide level2">
+<h2>Logistic regression</h2>
+<p>Logistic regression is used when we have a binary outcome variable</p>
+<p>Examples: whether or not someone develops and illness, whether or not someone is employed</p>
+<div class="fragment">
+<p>Because our dependent variable is not continuous, we can’t use linear regression</p>
+</div>
+</section>
+<section id="logistic-regression-2" class="slide level2">
+<h2>Logistic regression</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<p><img data-src="images/log-reg-plot.png" height="500"></p>
+</div><div class="column" style="width:40%;">
+<p>The distribution of the outcome follows a sigmoid curve</p>
+<p>The outcome is typically coded as did not happen (0) or did happen (1)</p>
+</div>
+</div>
+</section>
+<section id="motivating-example" class="slide level2">
+<h2>Motivating example</h2>
+<p>We are interested in the factors that predict admission to graduate school. We have a sample of 400 students, for whom we know the GPA, the GRE score, and the relative “prestige” of the undergraduate degree granting institution</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">head</span>(grad)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  admit gre  gpa rank
+1     0 380 3.61    2
+2     1 660 3.67    2
+3     1 800 4.00    4
+4     1 640 3.19    1
+5     0 520 2.93    1
+6     1 760 3.00    3</code></pre>
+</div>
+</div>
+</section>
+<section id="bivariate-options" class="slide level2">
+<h2>Bivariate options</h2>
+<p>If we only have one predictor, we could use a Chi square, but we wouldn’t be able to quantify the relationship between the two variables and predict the likelihood of the outcome</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="fu">table</span>(grad<span class="sc">$</span>admit, grad<span class="sc">$</span>rank)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   
+     1  2  3  4
+  0 55 93 97 28
+  1 12 28 54 33</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">chisq.test</span>(grad<span class="sc">$</span>admit, grad<span class="sc">$</span>rank)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's Chi-squared test
+
+data:  grad$admit and grad$rank
+X-squared = 25.242, df = 3, p-value = 1.374e-05</code></pre>
+</div>
+</div>
+</section>
+<section id="logistic-regression-3" class="slide level2">
+<h2>Logistic regression</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(admit <span class="sc">~</span> <span class="fu">factor</span>(rank), <span class="at">data =</span> grad, <span class="at">family =</span> binomial)</span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="fu">summary</span>(fit1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = admit ~ factor(rank), family = binomial, data = grad)
+
+Coefficients:
+              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)    -1.5224     0.3186  -4.778 1.77e-06 ***
+factor(rank)2   0.3220     0.3847   0.837  0.40252    
+factor(rank)3   0.9367     0.3610   2.595  0.00947 ** 
+factor(rank)4   1.6867     0.4093   4.121 3.77e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 499.98  on 399  degrees of freedom
+Residual deviance: 474.97  on 396  degrees of freedom
+AIC: 482.97
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+</section>
+<section id="under-the-hood-of-logistic-regression" class="slide level2">
+<h2>Under the hood of logistic regression</h2>
+<p>Logistic regression is no longer modeling our raw variables</p>
+<p>It is in fact calculating the odds of the outcome, and modeling this instead of our raw values</p>
+</section>
+<section id="under-the-hood-of-logistic-regression-1" class="slide level2">
+<h2>Under the hood of logistic regression</h2>
+<p>Odds of the outcome over the range of the predictor</p>
+
+<img data-src="images/odds-plot.png" class="r-stretch"></section>
+<section id="under-the-hood-of-logistic-regression-2" class="slide level2">
+<h2>Under the hood of logistic regression</h2>
+<p>Log transformed odds of the outcome over the range of the predictor is roughly linear</p>
+
+<img data-src="images/log-odds-plot.png" class="r-stretch"></section>
+<section id="under-the-hood-of-logistic-regression-3" class="slide level2">
+<h2>Under the hood of logistic regression</h2>
+<p>Regression coefficients are on the log scale. <span class="math inline">\(\beta&lt;0\)</span> is a negative association with the outcome, and <span class="math inline">\(\beta&gt;0\)</span> is a positive association with the outcome</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>fit1<span class="sc">$</span>coefficients</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  (Intercept) factor(rank)2 factor(rank)3 factor(rank)4 
+   -1.5224265     0.3220316     0.9366996     1.6867296 </code></pre>
+</div>
+</div>
+</section>
+<section id="converting-back-to-the-odds-scale" class="slide level2">
+<h2>Converting back to the odds scale</h2>
+<p>In order to get our coefficients back to the odds scale, we have to exponentiate (the opposite of taking the log)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>(log10 <span class="ot">&lt;-</span> <span class="fu">log</span>(<span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.302585</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="fu">exp</span>(log10)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 10</code></pre>
+</div>
+</div>
+<div class="fragment">
+<p>When we exponentiate coefficients, we obtain what is called the odds ratio</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  (Intercept) factor(rank)2 factor(rank)3 factor(rank)4 
+    0.2181818     1.3799283     2.5515464     5.4017857 </code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="interpreting-the-odds-ratio" class="slide level2">
+<h2>Interpreting the odds ratio</h2>
+<p>The odds ratio expresses the increase (1+) or decrease (0-1) in the odds of the outcome given a one unit increase in the predictor</p>
+<p>For a rank 2 undergrad school, the odds of admission are 1.38 times the odds of admission for a rank 1 undergrad school. This is a 38% increase in the odds of admission</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  (Intercept) factor(rank)2 factor(rank)3 factor(rank)4 
+    0.2181818     1.3799283     2.5515464     5.4017857 </code></pre>
+</div>
+</div>
+</section>
+<section id="uncertainty-in-logistic-regression" class="slide level2">
+<h2>Uncertainty in logistic regression</h2>
+<p>Mathematically it is not trivial to calculate an error term like we do in linear regression</p>
+<div class="fragment">
+<p>Instead, we prefer to report error associated with the odds ratio</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="fu">exp</span>(<span class="fu">cbind</span>(<span class="at">OR =</span> <span class="fu">coef</span>(fit1), <span class="fu">confint</span>(fit1)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     OR     2.5 %     97.5 %
+(Intercept)   0.2181818 0.1113753  0.3928625
+factor(rank)2 1.3799283 0.6613932  3.0210003
+factor(rank)3 2.5515464 1.2914351  5.3723987
+factor(rank)4 5.4017857 2.4773658 12.4315196</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="logistic-regression-with-multiple-predictors" class="slide level2">
+<h2>Logistic regression with multiple predictors</h2>
+<p>In which direction are the effects of each of the predictors?</p>
+<p>Which are significantly associated with the outcome?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(admit <span class="sc">~</span> gpa <span class="sc">+</span> gre <span class="sc">+</span>  <span class="fu">factor</span>(rank), </span>
+<span id="cb25-2"><a href="#cb25-2"></a>            <span class="at">data =</span> grad, <span class="at">family =</span> binomial)</span>
+<span id="cb25-3"><a href="#cb25-3"></a><span class="fu">summary</span>(fit2)<span class="sc">$</span>coefficients</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  Estimate  Std. Error    z value     Pr(&gt;|z|)
+(Intercept)   -5.541442750 1.138072371 -4.8691479 1.120805e-06
+gpa            0.804037549 0.331819298  2.4231187 1.538790e-02
+gre            0.002264426 0.001093998  2.0698635 3.846513e-02
+factor(rank)2  0.211259760 0.392856938  0.5377524 5.907480e-01
+factor(rank)3  0.876020749 0.366734923  2.3887028 1.690797e-02
+factor(rank)4  1.551463677 0.417831633  3.7131312 2.047107e-04</code></pre>
+</div>
+</div>
+</section>
+<section id="logistic-regression-with-multiple-predictors-1" class="slide level2">
+<h2>Logistic regression with multiple predictors</h2>
+<p>What is the OR for GPA? How would you interpret this?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="fu">exp</span>(<span class="fu">cbind</span>(<span class="at">OR =</span> <span class="fu">coef</span>(fit2), <span class="fu">confint</span>(fit2)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                       OR        2.5 %      97.5 %
+(Intercept)   0.003920866 0.0003969653  0.03468316
+gpa           2.234544824 1.1738582158  4.32383495
+gre           1.002266992 1.0001376016  1.00444573
+factor(rank)2 1.235233178 0.5816647395  2.74297492
+factor(rank)3 2.401325194 1.2005468071  5.10673863
+factor(rank)4 4.718371302 2.1245130121 11.02346892</code></pre>
+</div>
+</div>
+</section>
+<section id="prediction-with-logistic-regression" class="slide level2">
+<h2>Prediction with logistic regression</h2>
+
+<img data-src="images/log-reg-fit.png" class="r-stretch"></section>
+<section id="prediction-with-logistic-regression-1" class="slide level2">
+<h2>Prediction with logistic regression</h2>
+<p>To predict given values of the predictor:</p>
+<p>Bonus - can you guess the OR for student 2 versus student 1?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a>newdata <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">gre =</span> <span class="fu">c</span>(<span class="dv">590</span>, <span class="dv">590</span>), <span class="at">gpa =</span> <span class="fu">c</span>(<span class="fl">3.0</span>, <span class="fl">3.0</span>), <span class="at">rank =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb29-2"><a href="#cb29-2"></a></span>
+<span id="cb29-3"><a href="#cb29-3"></a><span class="co">#predict odds</span></span>
+<span id="cb29-4"><a href="#cb29-4"></a>newdata<span class="sc">$</span>pred.odd <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">predict</span>(fit2, newdata))</span>
+<span id="cb29-5"><a href="#cb29-5"></a></span>
+<span id="cb29-6"><a href="#cb29-6"></a><span class="co">#predict probability</span></span>
+<span id="cb29-7"><a href="#cb29-7"></a>newdata<span class="sc">$</span>pred.prob <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit2, newdata, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb29-8"><a href="#cb29-8"></a></span>
+<span id="cb29-9"><a href="#cb29-9"></a>newdata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  gre gpa rank  pred.odd pred.prob
+1 590   3    1 0.1664070 0.1426663
+2 590   3    3 0.3995972 0.2855087</code></pre>
+</div>
+</div>
+</section>
+<section id="link-functions-logit-or-probit" class="slide level2">
+<h2>Link functions: logit or probit?</h2>
+<p>Logistic regression uses a link function in the background.</p>
+<p><br> Two link functions are available: logit or probit</p>
+<p><br> For the most part they yield similar results, so generally it’s recommended to use whichever is more commonly accepted in your field</p>
+</section>
+<section id="evaluating-model-fit" class="slide level2">
+<h2>Evaluating model fit</h2>
+<p>We can’t use R<sup>2</sup> here, instead we can use the Akaike Information Criterion (AIC)</p>
+<p><br> The AIC is similar to the R<sup>2</sup> in that it tells us about the fit of our model to the data.</p>
+<p><br> But, rather than express the variability captured by the model, it expresses the information in the data that is <em>not</em> captured by the model.</p>
+</section>
+<section id="evaluating-model-fit-1" class="slide level2">
+<h2>Evaluating model fit</h2>
+<p>The AIC also penalizes models for having more terms, something that inherently improves R<sup>2</sup></p>
+<p><br> Lastly, AIC can only be used to compare a group of models, not individual models</p>
+<div class="fragment">
+<p><br></p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a>fit1<span class="sc">$</span>aic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 482.9667</code></pre>
+</div>
+</div>
+</div>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>fit2<span class="sc">$</span>aic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 470.5175</code></pre>
+</div>
+</div>
+</div>
+</div>
+</section></section>
+<section id="your-turn" class="title-slide slide level1 center">
+<h1>Your turn</h1>
+
+</section>
+
+<section>
+<section id="statistical-control" class="title-slide slide level1 center">
+<h1>Statistical Control</h1>
+<p>Or: How I learned to stop worrying and love uncertainty</p>
+<p><img data-src="images/trangelove.jpeg" height="500"></p>
+</section>
+<section id="control-in-observational-designs" class="slide level2">
+<h2>Control, in observational designs</h2>
+<p>When we build multivariate models, we do so because we want to <em>control</em> for some variables that might influence the relationship between our main predictor of interest and our outcome</p>
+</section>
+<section id="control-in-observational-designs-1" class="slide level2">
+<h2>Control, in observational designs</h2>
+<p>If we were in an experimental set up, we could actually control these variables to isolate the impact of our variable of interest on the outcome</p>
+<div class="fragment">
+<p>In most anthropological settings, it is not feasible to run a controlled experimental study for one or more of several reasons</p>
+</div>
+<div class="fragment">
+<p><br> So, we try to replicate this control over “confounding” variables using statistics</p>
+</div>
+</section>
+<section id="controlling-or-adjusting-for-covariates-or-confound" class="slide level2">
+<h2>Controlling or adjusting for covariates or confound</h2>
+<p>A <em>confounding variable</em> is an extraneous variable that affects the relationship between your predictor and your outcome.</p>
+<div class="fragment">
+<p><br>Confounding variables are also known as covariates</p>
+</div>
+<div class="fragment">
+<p><br>If these variables are not accounted for in your analysis, you could be obtaining the wrong results</p>
+</div>
+</section>
+<section id="example" class="slide level2">
+<h2>Example</h2>
+
+<img data-src="images/icecreamsharks.jpeg" class="r-stretch"><p>Check out this blog for more <a href="https://www.tylervigen.com/spurious-correlations">Spurious Correlations</a></p>
+</section>
+<section id="how-do-we-choose-confounders" class="slide level2">
+<h2>How do we choose confounders?</h2>
+<div>
+<p>Confounders are variables that:</p>
+<ol type="1">
+<li class="fragment">Are <em>associated</em> with the exposure variable</li>
+<li class="fragment">Are <em>causally</em> related to the outcome variable</li>
+<li class="fragment">Are not on the causal pathway between the exposure and outcome variable</li>
+</ol>
+</div>
+</section>
+<section id="how-do-we-adjust-for-confounders-in-our-analyses" class="slide level2">
+<h2>How do we adjust for confounders in our analyses?</h2>
+<div>
+<p>We have two options:</p>
+<ol type="1">
+<li class="fragment">We can stratify our analyses</li>
+<li class="fragment">We can add the variable to our regression</li>
+</ol>
+</div>
+</section>
+<section id="stratifying-analyses" class="slide level2">
+<h2>Stratifying analyses</h2>
+<div>
+<ul>
+<li class="fragment"><p>Repeat the analysis for different values of the confounder</p></li>
+<li class="fragment"><p>Most useful when the confounder is categorical</p></li>
+<li class="fragment"><p>Most useful when there are few values of the confounder</p></li>
+</ul>
+</div>
+</section>
+<section id="adding-to-regression" class="slide level2">
+<h2>Adding to regression</h2>
+<div>
+<ul>
+<li class="fragment"><p>Have seen this multiple times in our models already!</p></li>
+<li class="fragment"><p>However, selecting appropriate control variables in observational settings is contentious</p></li>
+<li class="fragment"><p>Over adding controls is just as bad as under adding</p></li>
+</ul>
+</div>
+</section></section>
+<section>
+<section id="statistical-philosphy-and-control-variables" class="title-slide slide level1 center">
+<h1>Statistical philosphy and control variables</h1>
+
+</section>
+<section id="why-do-we-use-statistics" class="slide level2">
+<h2>Why do we use statistics?</h2>
+<div>
+<p>Three competing reasons for using statistics:</p>
+<ol type="1">
+<li class="fragment">Description</li>
+<li class="fragment">Prediction</li>
+<li class="fragment">Causal inference</li>
+</ol>
+</div>
+</section>
+<section id="description" class="slide level2">
+<h2>Description</h2>
+<p>Purpose of the analysis is to summarize, describe, or visualize variables</p>
+<div class="fragment">
+<p><br> Less common (unfortunately) in anthropology</p>
+</div>
+<div class="fragment">
+<p><br> What happened? Who was affected? What was the occurrence of X across groups of people with Y?</p>
+</div>
+</section>
+<section id="prediction" class="slide level2">
+<h2>Prediction</h2>
+<p>Purpose is to find patterns, and often times to forecast</p>
+<div class="fragment">
+<p><br> Typically involves regression, classification methods</p>
+</div>
+<div class="fragment">
+<p><br> What will happen? Are certain groups of X more likely to have Y?</p>
+</div>
+</section>
+<section id="causal-inference" class="slide level2">
+<h2>Causal inference</h2>
+<p>Purpose is to understand</p>
+<div class="fragment">
+<p><br> Typically researchers want to understand the impact of a variable on another variable</p>
+</div>
+<div class="fragment">
+<p><br> If variable X changed, how would that impact variable Y?</p>
+</div>
+</section>
+<section id="what-are-we-really-doing-when-we-control-for-different-variables" class="slide level2">
+<h2>What are we really doing when we “control” for different variables?</h2>
+
+<img data-src="images/vars-in-models.png" class="r-stretch"></section>
+<section id="control-and-purpose-of-analysis" class="slide level2">
+<h2>Control and purpose of analysis</h2>
+<div>
+<p>If we are interested in:</p>
+<ul>
+<li class="fragment">Description/prediction: we may build in more variables into our analysis in order to improve the fit of our model to the data</li>
+<li class="fragment">Prediction: we may try to minimize the number of variables in our model to reduce the risk of overfitting</li>
+<li class="fragment">Causal inference: we throw this all out, open a whole new stack of textbooks, and formalize our knowledge of our study system with a DAG</li>
+</ul>
+</div>
+</section>
+<section id="or-how-i-learned-to-stop-worrying-and-love-uncertainty" class="slide level2">
+<h2>Or: How I learned to stop worrying and love uncertainty</h2>
+<div class="columns">
+<div class="column" style="width:70%;">
+<div class="fragment">
+<p><img data-src="images/box-wrong.jpeg"></p>
+</div>
+</div><div class="column" style="width:30%;">
+<div class="fragment">
+<p>When we use statistics, we make choices on which tool to use.</p>
+<p><br>There is no right or wrong choice (within reason).</p>
+</div>
+</div>
+</div>
+</section>
+<section id="learn-more" class="slide level2">
+<h2>Learn more</h2>
+<p>Peter Tennant’s brilliant UKRN talk: <a href="https://www.youtube.com/watch?v=Ts0hnNBRIWg&amp;t=36s&amp;ab_channel=UKReproducibilityNetwork">Introduction to Causal Inference and Directed Acyclic Graphs</a></p>
+<p>Richard McElreath’s brilliant Statistical Rethinking book and course: <a href="https://github.com/rmcelreath/stat_rethinking_2022">Github landing page</a></p>
+</section>
+<section id="attribution" class="slide level2">
+<h2>Attribution</h2>
+<ul>
+<li>The logistic regression motivating example is inspired by <a href="https://stats.oarc.ucla.edu/r/dae/logit-regression/">UCLA SMDA</a></li>
+<li>The odds and odds ratio example is inspired by <a href="http://www.sthda.com/english/articles/36-classification-methods-essentials/151-logistic-regression-essentials-in-r/">STHDA</a></li>
+</ul>
+
+<img src="images/bing-logo.png" class="slide-logo r-stretch"><div class="footer footer-default">
+
+</div>
+</section></section>
+    </div>
+  </div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="lecture9_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="lecture9_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="lecture9_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="lecture9_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="lecture9_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="lecture9_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="lecture9_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="lecture9_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="lecture9_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="lecture9_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'smaller': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button', {
+        text: function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+      });
+      clipboard.on('success', function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      });
+      function tippyHover(el, contentFn) {
+        const config = {
+          allowHTML: true,
+          content: contentFn,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start'
+        };
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          return note.innerHTML;
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

@@ -1,0 +1,164 @@
+---
+title: "Getting started with R"
+author: "Your-name-here"
+date: '2023-01-17'
+output: html_document
+---
+
+# Welcome to RMarkdown!
+
+This is an RMarkdown document (note the file extension, .Rmd). Markdown documents allow us to integrate normal written text with code chunks to create beautiful and reproducible documents. 
+
+Chunks of code will evaluate when you click the "knit" button above. This is what we call rendering the document. After rendering, the code will not be displayed in the document - only its output will be. 
+
+Running code in a chunk is equivalent to running it in a regular R Script, or in other words, it's the same as running it in the console.
+
+Your assignments will be submitted as rendered Rmd. For now, let's focus on learning some basics of R! 
+
+## Let's use the console a bit 
+
+Remember that R's job is simply to evaluate the results of statements that you give it. So, you can use it as a calculator.
+
+Run the code below as a chunk (click the green arrow), and then run copy and paste each line in the console to run it individually.
+
+```{r calc1}
+100/45+5
+100/(45+5)
+```
+
+R displays the results of each of these calculations, but does not save it. To save something so you can refer to it again, you should assign it as a new object. The assignment operator is `<-`. Here's an example: 
+
+```{r assign}
+x <- 100/(45+5)
+```
+
+Note that when you ran this code, R did not display the results. That's because it was told to save an object, not to display it. To display the object, type `x` into the console.
+
+# Let's start with `swirl`
+
+We're now going to spend some time with `swirl`, a package that facilitates learning R right in your console.
+
+Start by loading the package. It should already be installed. Use the function `library()`
+
+```{r load-swirl}
+library(swirl) # note: this is the command to load a package
+```
+
+Once you get a confirmation that it is loaded, install the course you need using the following code: 
+
+```{r}
+install_course("R Programming E")
+```
+
+Once you're ready to start, run the following command in the console: 
+`swirl()`. Choose the `R Programming E` course, and the `Basic Building Blocks`
+
+## Useful commands when doing tutorials in `swirl`
+
+`swirl` takes over your console while you're working with it. Here's a few tips to interact with it a bit better:
+
+- `bye()` - exits from the teaching session 
+- `play()` - pauses `swirl` if you want to play around with the console 
+- `nxt()` - resumes `swirl` after a pause
+- `skip()` - if for some reason you need to skip a question
+
+
+# Types of objects in R
+
+R operates with several different kinds of objects: vectors, matrices, lists, dataframes, etc. We're primarily going to work with vectors and data.frames in this course. 
+
+## Vectors 
+
+Vectors are a collection of values. Each vector can only contain values of one kind (besides missing values, coded as `NA`). 
+
+You can figure out what type a vector is by using the function `str()`. Vector types can be tricky - if your vector of numbers (called numerical) is coded as a character vector, your statistical tests might not run.
+
+Vectors can have the following types: 
+
+  - Logical - Can be only TRUE or FALSE
+  - Integer - Integer numbers only (no decimals)
+  - Numerical - Numbers 
+  - Character - Any character, alphanumeric or otherwise
+  
+The most flexible type of vector is character vector. 
+
+### Let's explore vectors with `swirl`
+
+Go ahead and start `swirl` again if you exited - use `swirl()`
+
+Navigate back to the correct course, but now select lesson 4: `Vectors`
+
+
+## Dataframes
+
+Dataframes are basically collections of vectors that record information about individuals, row wise. Vectors become the columns, so that each column can have a different type. **However**, in order for the dataframe to work, each of the vectors have to be of the same length (have the same number of entries. 
+
+Let's build a dataframe. First, we have to build vectors to put into the data frame. Let's keep them short, at 3 entries each.
+
+```{r vec-build}
+person <- c("1", "2", "3")
+age <- c(28, 32, 29)
+student <- c("Undergrad", "Undergrad", "Grad")
+```
+
+Now you can build them into a data frame using the `data.frame()` function. Save the resulting data frame as `df` - though you could call it pretty much anything you like.
+
+```{r df-build}
+df <- data.frame(person, age, student)
+```
+
+At this point, if you wanted to learn more about each of the vectors in the dataframe, you can do that by using the `str()` function. You can also double click the data frame in your environment to see its contents
+
+```{r df-str}
+str(df)
+```
+
+You've just built your first dataframe!
+
+# Subsetting vectors 
+
+Working with portions of vectors or dataframes is a really common task in data manipulation. Programmatically, subsetting is done with brackets - `[]`. The syntax looks something like this: 
+
+vector[matchingcondition] -- This tells R to look inside the vector you've specified, and return the elements that match the matching condition you've specified. 
+
+For example, let's say you wanted to select the elements in the `age` vector that are less than 30. You'd use the following code: 
+
+```{r subvec}
+age[age<30]
+```
+
+What's going on under the hood here? R is actually looking at each potential match, deciding whether the element matches the condition, scoring it a `TRUE` or `FALSE`. Then, the list of `TRUE` and `FALSE` is matched back against the vector, and only elements with a `TRUE` are kept. 
+
+Let's demonstrate this:
+
+```{r subdemo}
+age<30 
+```
+
+In fact, programmatically `TRUE` also stands for 1 and `FALSE` stands for 0. Let's demonstrate this using the `sum()` function:
+
+```{r}
+sum(age < 30) # by the way, R ignores spaces. they're good to add for readability though!
+```
+
+As you can see, this evaluates to 2, as there are two elements for which the condition is `TRUE`.
+
+You can also subset based on position in the vector. For example, if you wanted to get the second element of the vector `age`, you would use the following code: 
+
+```{r}
+age[2]
+```
+
+If you wanted to subset multiple different positions, say the first and second, you could write it in both of the following ways: 
+
+```{r}
+age[1:2]
+age[c(1, 2)]
+```
+
+
+## Let's practice subsetting a bit: 
+
+Go ahead and start `swirl` again. If it asks you to remove values in your environment, follow the instructions and do so. Then, select lesson 6: `Subsetting Vectors`
+
+

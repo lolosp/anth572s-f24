@@ -1,0 +1,59 @@
+---
+title: "Joining and pivoting datasets"
+author: "Your-name-here"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## 2. Pivoting
+
+For this exercise, You will use the following datasets, which live in the `tidyverse` library, and are a bit messy: 
+
+```{r}
+table4b <- table4b
+table4a <- table4a
+```
+
+`table4a` contains counts of cases for 1999 and 2000 across several countries. `table4b` contains population values for 1999 and 2000 across several countries 
+
+#### Q2.1. Have a look at both datasets. 
+
+```{r}
+
+```
+
+#### Q2.2. Which are the columns that should be pivoted longer?
+
+#### Q2.3. Pivot the tables longer, and save them as `table4a` and `table4b` (overwrite the old versions)
+
+```{r}
+
+
+```
+
+
+## 3. Joining 
+
+Now, let's plan to join the two datasets that were pivoted longer: `table4a` and `table4b`. 
+
+#### Q3.1. Let's start be identifying the columns that are shared. Visualize the structure of both dataframes, then list the columns that are repeated: 
+
+```{r}
+
+```
+
+#### Q3.2. Given the columns that overlap between the datasets, what kind of join would be appropriate? If you are choosing `left_join()` or `right_join()`, specify which dataframe is on the right or left. 
+
+
+#### Q3.3. Perform the join, specifying column(s) to join by, and save the resulting dataframe as a new object. Print the new dataframe to check your work.
+
+```{r}
+
+
+```
+

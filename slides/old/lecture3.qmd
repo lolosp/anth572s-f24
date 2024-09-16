@@ -1,0 +1,604 @@
+---
+title: "Statistical basics in R"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+--- 
+
+```{r, include = FALSE}
+library(tidyverse)
+library(openxlsx)
+```
+
+## Brief review of last week
+
+- We refreshed summary statistics 
+- You learned how to compute summary statistics and produce data visualizations
+
+## 
+
+::: callout-note
+## Learning objectives
+**At the end of this lesson you will:**
+
+-   Learn key functions for wrangling dataframes
+-   Refresh your understanding of the normal distribution 
+-   Do more data visualizations
+ 
+:::
+
+
+# 1. Working with data frames 
+
+```{r, include = FALSE}
+library(palmerpenguins)
+penguins <- penguins
+```
+
+## Introducing `dplyr`
+
+::::{.columns}
+
+:::{.column width="60%"}
+![](images/dplyr_wrangling.png)
+::: 
+
+:::{.column width="40%"}
+
+`dplyr` is a package within the `tidyverse` whose purpose is to help us wrangle data - that is reshape and manipulate it
+
+:::
+
+::::
+
+
+::: aside
+
+Artwork by [Allison Horst](https://allisonhorst.com/data-science-art)
+
+::: 
+
+## Introducing `dplyr`
+
+The main functions we will introduce today from `dplyr` are: 
+
+  - `filter()` 
+  - `select()`
+  - `mutate()`
+  - `rename()`
+  
+## Introducing `dplyr`
+
+All of the functions in this package share a few commonalities:
+
+  - The first argument is a data frame type object (data frame or tibble)
+  - Subsequent arguments describe what to do with the data frame. You can refer to columns directly by name without $ operator
+  - The result returns a new data frame 
+  - Data frames must be in tidy format to take full advantage of dplyr
+  
+## Accessing dataframe elements with `$`
+
+Each dataframe is composed of vectors. These are technically elements of the dataframe. 
+
+```{r}
+str(penguins)
+```
+
+## Accessing dataframe elements with `$`
+
+In order to access an element of a dataframe (a vector), you can use the `$` operator to specify it by name
+
+```{r}
+penguins$bill_length_mm %>% head(30)
+
+penguins$species %>% head(30)
+```
+
+## Accessing dataframe elements with `$`
+
+You can perform operations on a vector from a dataframe just as you would on any other vector:
+
+```{r}
+bill_length_cm <- penguins$bill_length_mm/10
+
+head(bill_length_cm, 30)
+```
+
+## Accessing dataframe elements with `$`
+
+You can also define a new variable in a dataframe using the `$` and `<-` operators
+
+```{r}
+penguins$bill_length_cm <- penguins$bill_length_mm/10
+
+colnames(penguins)
+```
+
+## Logical operators for subsetting
+
+Here are the logical operators you should commit to memory:
+
+  - `==` - Equals 
+  - `!=` - Does not equal
+  - `>` and `>=` - Greater than and Greater than or equal to
+  - `<` and `<=` - Less than and Less than or equal to
+  - `%in%` - Included in (followed by a vector)
+  - `is.na()` - Is a missing value
+  - `&` and `|` - And ; Or, for stringing multiple criteria
+
+
+## Selecting columns with `select()`
+
+Sometimes with large datasets, or when manipulating columns you want to select only certain columns to keep. `select()` is a very useful way to do this.
+
+```{r}
+select(penguins, species, year)
+```
+
+## Selecting columns with `select()`
+
+We can select multiple consecutive columns with `:`, which will keep all columns starting with the first specified and ending with the second specified. 
+
+```{r}
+select(penguins, species:bill_length_mm, year)
+```
+
+## Selecting columns with `select()`
+
+We can select also pair select with helper functions such as `starts_with()`, `ends_with()`, `contains()`, `matches()` 
+
+```{r}
+select(penguins, ends_with("_mm"))
+```
+
+## Selecting columns with `select()`
+
+We can also "negatively select," in the sense that we can get rid of columns while keeping the rest by prefacing our selection arguments with a `-` sign: 
+
+```{r}
+select(penguins, -ends_with("_mm"))
+```
+
+## Subsetting columns with `select()` rather than indexing
+
+It is possible to select columns with indexing, as we did with vectors e.g. `penguins[,1:3]` returns columns 1-3.
+
+. . . 
+
+This is not great practice. If we were to change the ordering of the columns, either through uploading a new dataset or by changing a data management step, we would have to revisit our indexing.
+
+
+## Filtering a dataset with `filter()`
+
+![](images/filter-horst.png)
+
+::: aside
+
+Artwork by [Allison Horst](https://allisonhorst.com/data-science-art)
+
+::: 
+
+## Filtering a dataset with `filter()`
+
+We can filter for multiple values in one call 
+
+```{r}
+filter(penguins, species == "Adelie" & year != 2007)
+```
+
+## Filtering a dataset with `filter()`
+
+To filter for missing values (`NA`) use `is.na()` or `!is.na()`
+
+```{r}
+filter(penguins, is.na(flipper_length_mm))
+```
+
+## Filtering a dataset with `filter()`
+
+To filter for multiple values of a variable, use `|` or `%in%`
+
+```{r}
+filter(penguins, species == "Adelie" | species == "Gentoo")
+```
+
+## Filtering a dataset with `filter()`
+
+To filter for multiple values of a variable, use `|` or `%in%`
+
+```{r}
+filter(penguins, species %in% c("Adelie", "Gentoo"))
+```
+
+## Filtering a dataset with `filter()`
+
+To filter for multiple values of a variable, use `|` or `%in%`
+
+```{r}
+targetspecies <- c("Adelie", "Gentoo")
+filter(penguins, species %in% targetspecies)
+```
+
+
+## Renaming columns with `rename()`
+
+Renaming columns is a breeze, using the sytax `new = old`. This is so much better than having to use `colnames()` and indexing!
+
+```{r}
+rename(penguins, bill.l = bill_length_mm, flip.l = flipper_length_mm)
+```
+
+## Adding new columns with `mutate()`
+
+::::{.columns}
+
+:::{.column width="50%"}
+![](images/mutate_horst.png)
+
+::: 
+
+:::{.column width="50%"}
+
+`mutate()` allows us to add new columns to our dataset. It's especially useful for defining new columns as a computation of other columns.  
+
+:::
+
+::::
+
+
+::: aside
+
+Artwork by [Allison Horst](https://allisonhorst.com/data-science-art)
+
+::: 
+
+## Adding new columns with `mutate()`
+
+```{r}
+mutate(penguins, bill_length_mm = bill_length_cm/10)
+```
+
+
+## Adding new columns with `mutate()`
+
+Let's add a column called `cute`, which is coded "yes" if bill length < 35mm, and "no" if bill length >= 35mm 
+
+```{r}
+mutate(penguins, cute = ifelse(bill_length_mm < 35, "Yes", "No"))
+```
+
+## Adding new columns with `mutate()`
+
+Let's add a column that calculates the z-score for bill length - this can be done in one line, but let's do it in two to illustrate that we can call on new variables within a mutate call:
+
+```{r}
+mutate(penguins, 
+       bill_length_z = bill_length_mm - mean(bill_length_mm, na.rm = TRUE), 
+       bill_length_z = bill_length_z/ sd(bill_length_mm, na.rm = TRUE))   %>% select(species, island, bill_length_mm, bill_length_z)
+```
+
+## The pipe operator `%>%`
+
+:::: {.columns}
+
+:::{.column width="60%"}
+
+Often times, we want to string together multiple operations. The pipe operator allows us to do that. <br><br>
+
+Kind of like a `ggplot2` layers, the pipe inherits the data from the previous operation and passes it on to the next.
+
+:::
+
+:::{.column width="40%"}
+
+![](images/pipe-puppies.jpeg)
+
+::: aside
+
+Artwork by [Allison Horst](https://allisonhorst.com/data-science-art)
+
+:::  
+
+:::
+
+::::
+
+
+## A few `%>%` example
+
+When we want to use a pipe, we move the name of the dataframe out of the function:
+
+```{r}
+penguins %>% 
+  mutate(bill_length_cm = bill_length_mm/10)%>%
+  filter(species == "Gentoo")%>% 
+  select(island, sex, bill_length_cm)
+```
+
+## A few `%>%` example
+
+We can also string `dplyr` pipes with `ggplot2`
+
+```{r}
+penguins %>% 
+  filter(species %in% c("Gentoo", "Chinstrap"))%>%
+  ggplot(aes(x = body_mass_g, y = bill_length_mm))+ # note we use + 
+    geom_point(aes(col = species))+
+    geom_smooth(method = "lm", se = FALSE)
+```
+
+## Other useful functions 
+
+We're not going to cover these in detail, but they are pretty useful and you may need to refer to them later:
+
+  - `relocate()` for moving columns relative to others within a dataframe
+  - `arrange()` for sorting by values in a column
+
+
+
+## Summarizing 
+
+Last week, we produced summaries with base R functions for quick assessment of individual groups. We also used `table1` to make nicely formatted tables summarizing multiple variables.
+
+. . . 
+
+There is one more use for summarizing data that is super useful for data analysis: summarizing across groups.
+
+## Summarizing across groups
+
+```{r, include = FALSE}
+child <- read.xlsx("data/child-loop-long.xlsx")
+```
+
+This can be very useful when we want to produce summary statistics for different groups, or even better, when we want to derive new variables for use in future analyses. 
+
+. . . 
+
+For example, in this dataset, you might want to count the number of children born to each woman
+
+```{r, echo = FALSE}
+child %>% filter(!is.na(age))%>% head()
+```
+
+## Summarizing across groups 
+
+You can achieve this with `group_by()`and `summarize()` like so:
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r, echo = FALSE}
+child %>% filter(!is.na(age))%>% select(id, child) %>% head(10)
+```
+
+:::
+
+:::{.column width="50%"}
+
+```{r}
+child %>% 
+  filter(!is.na(age))%>%
+  group_by(id)%>%
+  summarize(n_kids = n())
+```
+
+:::
+
+::::
+
+## Summarizing across groups 
+
+You can also produce lots of other summary statistics: 
+
+```{r}
+penguins %>% 
+  group_by(species)%>%
+  summarize(n = n(), 
+            mean_bill_l = mean(bill_length_mm, na.rm = TRUE), 
+            sd_bill_l = sd(bill_length_mm, na.rm = TRUE))
+```
+
+# Your turn: Posit Cloud 1 and 2
+
+# 2. Statistical basics 
+
+## The normal curve 
+
+The normal curve is a theoretical distribution which we often use as the model for many of our variables. 
+
+Its features: 
+
+  - most of the scores are near the middle
+  - distribution is symmetrical about the mean
+  - the mean, mode, and median are the same 
+  - it is described by mean = 0 and sd = 1
+  
+## The normal curve 
+
+Here is what the normal curve looks like - the data producing these results is simulated.
+
+```{r, echo = FALSE}
+sample <- data.frame(index = seq(1, 50000, 1), 
+                     value = rnorm(50000, mean = 0, sd = 1))
+
+ggplot(sample, aes(x = value))+ geom_density()+ scale_x_continuous(breaks = seq(-4, 4, 1))+ theme_minimal()+ggtitle("The Normal Curve")
+```
+
+## The normal curve 
+
+Here is what the normal curve looks like - the data producing these results is simulated.
+
+```{r, echo = FALSE}
+ggplot(sample, aes(x = value))+ geom_density()+ scale_x_continuous(breaks = seq(-4, 4, 1))+ theme_minimal()+ggtitle("The Normal Curve")+ geom_vline(xintercept = 0, color = "red")
+```
+
+## The normal curve 
+
+The first standard deviation from the mean covers ~34% of the data on either side, for a total of 68% of the data in the range from -1 sd to +1 sd 
+
+```{r, echo = FALSE}
+ggplot(sample, aes(x = value))+ geom_density()+ scale_x_continuous(breaks = seq(-4, 4, 1))+ theme_minimal()+ggtitle("The Normal Curve")+ geom_vline(xintercept = 0, color = "red")+ geom_vline(xintercept = c(-1, 1), color = "black", lty = "dashed")
+```
+
+## The normal curve 
+
+The second standard deviation from the mean covers an additional ~13.5% of the data on either side, for a total of approx. 95% of the data in the range from -2 sd to +2 sd 
+
+```{r, echo = FALSE}
+ggplot(sample, aes(x = value))+ geom_density()+ scale_x_continuous(breaks = seq(-4, 4, 1))+ theme_minimal()+ggtitle("The Normal Curve")+ geom_vline(xintercept = 0, color = "red")+ geom_vline(xintercept = c(-1, 1, -2, 2), color = "black", lty = "dashed")
+```
+
+## The normal curve 
+
+The third standard deviation from the mean covers an additional ~2% of the data on either side, for a total of approx. 99.7 % of the data in the range from -3 sd to +3 sd. 0.15% of the data are greater than 3 sd away from the mean.
+
+```{r, echo = FALSE}
+ggplot(sample, aes(x = value))+ geom_density()+ scale_x_continuous(breaks = seq(-4, 4, 1))+ theme_minimal()+ggtitle("The Normal Curve")+ geom_vline(xintercept = 0, color = "red")+ geom_vline(xintercept = c(-1, 1, -2, 2), color = "black", lty = "dashed")
+```
+
+## The normal curve 
+
+Coverage of the normal curve by standard deviations 
+
+Hint: This is important, commit this to memory.
+
+![](images/sd_coverage.png)
+
+
+## Z-scores: deviation for a single individual
+
+
+The z-score quantifies the standardized deviation from the mean. 
+
+. . . 
+
+It is calculated as the difference between the score and the mean, divided by the standard deviation 
+
+![](images/z-score-formula.jpeg)
+
+## Z-scores: deviation for a single individual
+
+Things to know about z-scores:
+
+  - They express deviation from the mean in terms of standard deviations (they are standardized)
+  - You can calculate the percentage of the distribution that falls above/below a z-score or between two z-scores
+
+## Z-scores: deviation for a single individual 
+
+For example, if you had someone whose height fell at the z-score 2.10, you could calculate how tall they are relative to the rest of the population 
+
+```{r}
+pnorm(2.10, mean = 0, sd = 1)
+```
+
+```{r, echo = FALSE}
+
+as.data.frame.density <- function(x) data.frame(x = x$x, y = x$y)
+
+densities <- 
+  as.data.frame.density(density(sample$value))
+
+ggplot(densities, aes(x = x, y = y)) + 
+  geom_density(stat = 'identity')+
+  geom_density(data = subset(densities, x < 2.10), fill = "turquoise", stat = 'identity', alpha = 0.6)+theme_minimal()+
+  scale_x_continuous(breaks = seq(-4, 4, 1))
+
+```
+
+
+## Z-scores: deviation for a single individual 
+
+For example, if you had someone whose height fell at the z-score 2.10, you could calculate how tall they are relative to the rest of the population 
+
+```{r}
+pnorm(2.10, mean = 0, sd = 1)
+```
+
+
+We can also generate the likelihood of finding someone that tall, or taller:
+
+```{r}
+1 - pnorm(2.10, mean = 0, sd = 1)
+
+pnorm(2.10, mean = 0, sd = 1, lower.tail = FALSE)
+```
+
+
+## The normal distribution 
+
+The normal distribution is what makes statistics so powerful. 
+
+. . . 
+
+We know that our samples are not perfectly normal, but if they approximate the normal distribution closely enough, we can use the normal distribution to study our samples.
+
+## The normal distribution
+
+You can think of the normal distribution almost like a probability distribution. 
+
+The probability of a score landing between the mean and +1 sd is 0.34 or 34%
+
+. . . 
+
+```{r}
+mean <- pnorm(0, mean = 0, sd = 1)
+plusone <- pnorm(1, mean = 0, sd = 1)
+```
+
+![](images/sd_coverage.png)
+
+## The normal distribution
+
+You can think of the normal distribution almost like a probability distribution. 
+
+The probability of a score landing between the mean and +1 sd is 0.34 or 34%
+
+
+```{r}
+mean <- pnorm(0, mean = 0, sd = 1)
+plusone <- pnorm(1, mean = 0, sd = 1)
+```
+
+```{r}
+plusone - mean
+```
+
+
+# Quick note - submitting your assignments 
+
+## Creating a knitted html document
+
+![](images/knit-ex.png)
+
+## Creating a knitted html document 
+
+![](images/knit-export.png)
+
+
+# Your turn: Posit Cloud
+
+
+## Summary
+
+::: callout-note
+## Learning objectives
+**In this lesson you:**
+
+-   Refreshed your understanding of the normal distribution 
+-   Learned how to wrangle dataframes
+ 
+:::
+
+## Attribution 
+
+- The `pivot` section of this lecture is inspired by: [R4DS](https://r4ds.had.co.nz/tidy-data.html?q=pivot#pivoting)
+- Also inspired by [Data Carpentries' R for Ecology Course](https://datacarpentry.org/R-ecology-lesson/03-dplyr.html)
+
+

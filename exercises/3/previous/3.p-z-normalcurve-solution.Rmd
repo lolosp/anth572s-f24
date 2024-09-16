@@ -1,0 +1,113 @@
+---
+title: "Probability distributions"
+author: "Answer key"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Problem 1
+
+Suppose that a test of sensitivity to cilantro's soapy taste is known to have a mean of 20, a standard deviation of 3, and to follow a normal curve. What percentage of people have scores *above* 24?
+
+### Step 1: convert to a z-score
+
+Use the value, mean and standard deviation to calculate the z-score for a test value of 24.
+
+```{r}
+z <- (24-20)/3
+z
+```
+
+### Step 2: which area of the curve?
+
+Consider which area of the curve you are trying to calculate. Let's visualize this a bit. The plot below produces a normally distributed curve with the mean and standard deviation specified in the problem. Add a vertical line to the value you are using using the `geom_vline()` geometry. Learn about this geometry and its arguments with `?`. 
+
+Q1. Do you want to cover the portion of the curve to the right or to the left of this line?
+Hint: You are looking for the probability of getting a score greater than 24. 
+
+
+* Right - since we are looking for the probability of obtaining a score that is greater, we want everything above or greater than our score of interest* 
+
+```{r}
+ggplot(data = data.frame(x = c(10, 30)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 20, sd = 3))+
+  geom_vline(xintercept = 24)
+```
+Q2. Make a rough estimate of the percentage of the curve that would fall in the direction you've selected in Q1.
+
+*Maybe 10%? 15%? Roughly something in there*
+
+### Step 3: Calculate the area that is in the tail given the z-score
+
+Use `pnorm()` to calculate the probability cut point for your z-score. The help file for pnorm is kind of a lot, so it may not be very helpful for you, but you can refer to lecture slides to format the function.
+
+```{r}
+pnorm(1.33, lower.tail = FALSE) # note that by default, pnorm assumes a normal curve 
+```
+
+
+Q3. Did the probability/percentage you came up with match with your expectations? If not, check your work - did you specify the correct tail and/or substract the resulting probability from 1 if needed?
+
+*Note that if your p was roughly 0.90, you likely specified the wrong direction. You can check yourself by using the plot as a tool to set your expectations and double check your work*
+
+## Problem 2
+
+Let's reverse the direction of this problem. We are still using the same test of sensitivity to cilantro's soapy taste, which is still known to have a mean of 20, a standard deviation of 3, and to follow a normal curve. What raw test score would be needed to land in the top 75% of the distribution?
+
+
+### Step 1: Find the probability value that represents the right cutpoint on the distribution
+
+Use the image below to calculate roughly the point in the distribution where the data is separated into the top 75% of the distribution and its other portion.
+
+Q1. Considering the cutpoint you selected, the normal distribution and the coverage of the standard deviations, in which z-scores range should you expect your Z-score to fall to cover the top 75%?
+
+*To reason through this, you need to add up the percentages of the curve that are covered with each sd. At the mean or z = 0, you are at the 50th centile. At mean + 1sd or z = 1, you are at the 84th centile. So z for the 75th centile should fall between 0 and 1, maybe somewhere around z = 0.7*
+
+![](sd_coverage.png)
+
+### Step 2: Calculate the Z-score that corresponds to the probability threshold
+
+Use `qnorm()` for this. This function works much the same as `pnorm()` but takes a probability and returns a z-score.
+
+```{r}
+qnorm(0.75) # this is the reverse of pnorm - we feed a probability and get back a z-score!
+
+# using pnorm on the result of the above operation returns us our original centile of interest
+pnorm(0.674498)
+```
+
+Q2. Did the z-score fall in the range you anticipated it to? If not, check your probability value.
+
+*yup! and we estimated pretty close!*
+
+### Step 3: Solve the z-score equation 
+
+Now that you have the z-score, and you already know the mean and the standard deviation of the distribution, use the z-score equation to solve for the raw score needed to attain that z-score.
+
+Again, the z-score formula is: z = (X-mean)/sd
+
+*starting by filling in the formula  -- 0.67 = (x - 20)/4, simplified to x = 0.67 x 4 + 20*
+
+```{r}
+# reminder you're still looking for the score needed to score at or above 75% of the distribution
+
+x <- 0.67 * 4 + 20
+x  
+
+```
+
+Q3. What score is needed on the test in order to fall into the top 75% of the distribution?
+
+* The score needed is 22.68 *
+
+
+
+
+## Attribution
+
+- Problem set from Aron, Aron and Coups. 2008. Statistics for the behavioral and social sciences. Pearson Prentice Hall 

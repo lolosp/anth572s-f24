@@ -1,0 +1,493 @@
+---
+title: "Two sample t-tests"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+---
+
+## Building on foundations
+
+We have now introduced the fundamentals of hypothesis testing with z-scores and means of samples (z and t)
+
+Now we're going to start dealing with two sample tests 
+
+
+# Writing hypotheses
+
+
+:::{.incremental}
+Good set of null/alternate hypotheses should: 
+
+  1. The statistic/parameter to be compared
+  2. The direction/non-direction of the effect
+  3. A value of interest for the statistic/parameter
+  
+:::
+
+## More details on the null
+
+The null hypothesis should always express that there is no difference from the value of interest  
+
+In other words, you can always say "The mean is 0"
+
+## Scripts for the null and alternate
+
+Test whether a sample from a population has a mean that is greater than 9
+
+Null: The mean is 9. Think of it as: $\mu$ = 9
+
+Alternate: The mean is greater than 9. Think of it as: $\mu$ > 9
+
+
+## Example
+
+The Lourdes hospital emergency room claims that the mean waiting time for their patients is 2 hours. You observe patients waiting in the ER for a morning shift, finding that they wait an average of 2.5 hours with a standard deviation of 15 minutes.  
+
+. . . 
+
+H~0~: The mean waiting time is 2 hours
+$\mu$ = 2
+
+. . . 
+
+H~1~: The mean waiting time is not 2 hours
+$\mu$ $\neq$ = 2
+
+## Example
+
+Eight participants in an experimental procedure are tested. Their scores are: 14, 8, 6, 5, 13, 19, 19, and 6. The population of people not given the experimental procedure is normally distributed with a mean of 6. Does the experimental procedure make a difference?
+
+. . . 
+
+H~0~: The mean test score is 6
+$\mu$ = 6
+
+. . . 
+
+H~1~: The mean test score is not 6
+$\mu$ $\neq$ = 6
+
+## Example
+
+Participants engage in a study to test whether humans adhere to 24 hour sleep-wake cycles when they have no access to natural light. At the end of the trial, the duration of sleep-wake cycles for the participants in hours is: 25, 27, 23, 24, 25.
+
+. . . 
+
+H~0~: The mean sleep cycle length is 24 hours
+$\mu$ = 24
+
+. . . 
+
+H~1~: The mean sleep cycle length is not 24 hours
+$\mu$ $\neq$ = 24
+
+# Paired sample t-test
+
+## Testing for differences in the same individuals
+
+Recall our class social intervention example. We decided to compare the test scores for individuals who undergo the intervention and those who do not 
+
+. . . 
+
+Alternatively, our experimental design could have been to have participants take a test, then undergo the intervention, then be re-tested
+
+## Paired sample t-test
+
+The paired sample t-test is used in situations where we have multiple scores from the same individual/subject 
+
+. . . 
+
+In these situations, we are really interested in the distributions of the differences between the first and second measurements. 
+
+. . . 
+
+If the distribution is different from 0, then we can infer that there is a difference between the groups.
+
+
+## Paired sample t-test
+
+![](images/paired-t-formula.png)
+
+The test formula is similar to the simple t test but instead of $\bar{x}$ we are now testing for the mean of differences in scores denoted $\bar{d}$
+
+## An example
+
+Let's say we collect the following pre and post intervention scores
+
+```{r}
+pre <- c(75, 80, 78, 90, 77, 82, 85, 88, 78, 92)
+post <- c(78, 83, 77, 92, 79, 89, 84, 90, 77, 93)
+```
+
+## 1. State the null and alternate hypothesis
+
+H~0~: The mean difference in test scores is 0 
+<br>H~1~: The mean difference in test scores is not 0 
+
+## 2. Compute your comparison distribution 
+
+Mean = 0
+
+## 3. Calculate the critical value
+
+Set the alpha at 0.05. Then divide by two
+
+```{r}
+crit <- qt(c(0.025, 0.975), df = 9)
+crit
+```
+
+## 4. Calculate the test statistic
+
+First step is to calculate the differences and the standard deviation for the difference, then compute the t statistic
+
+```{r}
+d <- post-pre
+t <- mean(d)/(sd(d)/sqrt(10))
+t
+```
+
+## 5. Conclude on the null 
+
+Do we reject the null hypothesis or fail to reject it?
+
+```{r}
+crit
+t
+```
+
+
+# Independent sample t-tests
+
+## Testing for difference in means in two samples
+
+So far, we have learned procedures for a single individual, for a single sample, and for paired measurements. 
+
+In reality, most of the time, we don't know much about the population and we have two groups/samples that we want to compare.
+
+## Example
+
+Researchers are interested in knowing whether journaling about statistics can affect students' performance in their statistics courses. Two groups of 15 students are asked to journal 10 minutes a day. One is asked to write positive thoughts, the other to write about their fears. After 30 days we give them a test. We want to know if the groups' tests scores are different.
+
+## Independent sample t-test
+
+This variation of the t-test tests for differences in means between samples
+
+![](images/t-test.png)
+
+## Independent sample t-test
+
+![](images/differences-distribution-means2.jpeg){height=600}
+
+
+## Independent sample t-test
+
+The logic of the test means that the comparison distribution is now the distribution of differences between the means.
+
+
+## Independent sample t-test
+
+We are now testing the null hypothesis that the population means are the same. 
+
+. . . 
+
+If the population means are the same, we can also reasonably assume that the population variances/standard deviations are the same.
+
+. . . 
+
+If the population variances are the same, we can get a better estimate by combining the standard deviations from each sample
+
+
+## Independent sample t-test
+
+![](images/indep-sample-t-formula.png){height=200}
+s^2^~p~ is the pooled sample variance
+
+## Independent sample t-test
+
+![](images/sample-var-t-test.png){height=200}
+
+
+## Independent sample t-test
+
+In simple words, the test statistic is now the difference between the means of the sample divided by the pooled sample variance.
+
+## Degrees of freedom 
+
+Degrees of freedom in the two-sample t-test is the total number of items sampled minus the number of samples, or mathematically:
+
+*n~1~* + *n~2~* - 2
+
+## Null and alternate hypothesis 
+
+H~0~: There is no difference in the mean of *variable* between the groups
+<br>H~1~: There is a difference in the mean of *variable* between the groups
+
+## Assumptions for the two-sample t-test
+
+:::{.incremental}
+
+1. The observations in the groups are independent of each other
+2. The two populations are approximately normal
+3. The two populations have equal variance (and therefore standard deviations)
+
+::: 
+
+. . . 
+
+Important!
+
+
+## Checking assumptions: Independence 
+
+<br> How to test?
+ 
+. . . 
+
+Common-sense call, no formal test 
+
+## Checking assumptions: Normality 
+
+<br> How to test?
+ 
+. . . 
+
+QQ plot (`car::qqPlot()`)
+Shapiro-Wilks test (`shapiro.test()`)
+
+## Assumptions: Homogeneity of Variance 
+
+<br> How to test?
+ 
+. . . 
+
+Levene's test (`car::leveneTest()`)
+
+
+## Hypothesis testing process 
+
+From now on, it gets harder to calculate test statistics and critical values. 
+
+. . .
+
+You'll not be asked to solve for test values anymore - you'll run the appropriate commands in R instead. 
+
+. . . 
+
+You should still know and follow the modified hypothesis testing processes.
+
+## Hypothesis testing process
+
+:::{.incremental}
+
+1. State the null and alternate hypotheses
+2. Check assumptions and select a test
+3. Set your significance level 
+4. Compute the test statistic and significance level
+5. Conclude on the null hypothesis
+:::
+
+## An example
+
+```{r, include = FALSE}
+library(palmerpenguins)
+library(tidyverse)
+library(car)
+penguins <- penguins
+adelie <- subset(penguins, species == "Adelie")
+gentoo <- subset(penguins, species == "Gentoo")
+chinstrap <- subset(penguins, species == "Chinstrap")
+
+```
+
+::::{.columns}
+
+:::{.column width="60%"}
+
+Is there a difference in bill length between Adelie and Gentoo penguins?
+
+:::
+
+:::{.column width="40%"}
+![](images/penguins.png)
+
+:::
+
+::::
+
+## 1. State the null and alternate hypotheses
+
+  
+
+. . . 
+
+<br>H~0~: There is no difference in mean bill length between Adelie and Gentoo penguins
+
+. . . 
+
+<br>H~1~: There is a difference in mean bill length between Adelie and Gentoo penguins
+
+## 2. Check your assumptions: independence
+
+1. Are the data independent?
+
+. . . 
+
+<br> <br> Penguins are not measured twice, so we're good to go
+
+
+## 2. Check your assumptions: normality
+
+QQ plots can help us assess normality - we're looking for our observations to stay within the dotted confidence interval lines
+
+::::{.columns}
+
+
+:::{.column width="50%"}
+
+```{r}
+
+qqPlot(adelie$bill_length_mm)
+
+```
+
+:::
+
+:::{.column width="50%"}
+
+```{r}
+
+qqPlot(gentoo$bill_length_mm)
+
+```
+
+:::
+
+::::
+
+
+## Checking assumptions: normality
+
+The null hypothesis for the Shapiro-Wilk test is that the data follow a normal distribution 
+
+
+It's important to note that for very large samples (n>50) the Shapiro-Wilks test is very sensitive to slight deviations from normality.
+
+```{r}
+shapiro.test(adelie$bill_length_mm)
+shapiro.test(gentoo$bill_length_mm)
+```
+
+
+## Checking assumptions: equal variance
+
+```{r}
+penguingroup <- penguins %>% filter(species %in% c("Adelie", "Chinstrap"))
+
+penguins_trim <- penguins %>% filter(species %in% c("Adelie", "Gentoo"))
+
+leveneTest(bill_length_mm ~ species, data = penguins_trim)
+leveneTest(bill_length_mm ~ species, data = penguingroup)
+```
+
+
+## Welch's t-test
+
+In practice, Welch's test is becoming preferred because it is much more robust with heterogeneity of variances and it loses little power compared to a traditional t-test when sample variances are the same.
+
+```{r}
+
+t.test(adelie$bill_length_mm, chinstrap$bill_length_mm, 
+       var.equal = FALSE)
+```
+
+## Choosing a t-test
+
+How many samples do you have? If one, one sample t-test.
+
+. . . 
+
+If two, are the samples drawn from the same or different individuals?
+If the same, paired t-test. 
+
+. . . 
+
+If different, do the samples meet the homogeneity of variances?
+If so, Student/standard t-test
+
+. . . 
+
+If not, Welch t-test
+
+## 3. Set a significance level 
+
+We're going to work with $\alpha$ = 0.05
+
+## 4. Calculate the test statistic
+
+```{r}
+test1 <- t.test(adelie$bill_length_mm, gentoo$bill_length_mm, 
+                var.equal = TRUE)
+test1
+
+```
+
+## 5. Conclude on the null hypothesis 
+
+```{r}
+test1$p.value 
+test1$p.value < 0.05
+```
+
+What do we conclude about the null hypothesis?
+
+## 5. Conclude on the null hypothesis 
+
+*REMEMBER* that the probability (p-value) and the critical value are intrinsically linked - you can toggle between them using the t-table
+
+```{r}
+pt(-1.5, df = 30)
+
+qt(0.07203, df = 30)
+
+```
+
+
+
+# Interpreting *p*-values
+
+## The meaning of the *p*-value
+
+The *p*-value is often misunderstood. 
+
+. . . 
+
+The *p*-value is the probability of observing data as or more extreme as our data if the null hypothesis is true.
+
+## The meaning of the *p*-value
+
+When we set $\alpha$, we set the *p*-value at which we consider that our data are too extreme to be likely to arise by chance. 
+
+. . . 
+
+The *p*-value is not magic, it is set by researchers before they begin hypothesis testing and is completely linked to the test statistic
+
+. . . 
+
+In turn, the test statistic is partly dictated by sample size 
+
+## The meaning of the *p*-value
+
+So, the *p*-value is quite subjective and this is an incontournable fact of statistics.
+
+
+# Your turn: Posit 
+
+
+

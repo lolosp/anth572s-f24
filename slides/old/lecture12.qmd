@@ -1,0 +1,491 @@
+---
+title: "Survival analysis"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(survminer)
+library(survival)
+library(patchwork)
+library(ggpubr)
+```
+
+## What is survival analysis? 
+
+<br> Allows us to model the time it takes for an event to occur
+
+<br> Also called time to event analysis - event does not have to be death/survival
+
+
+## Modelling time to event
+
+![](images/survival-vaccine.png)
+
+
+## Why not use linear regression?
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+Survival analysis is better suited for several reasons: 
+
+- Doesn't assume that the occurrence of the event is the same over time
+- Accounts for time, which is always > 0
+- Can deal with censoring 
+
+:::
+
+:::{.column width="50%"}
+
+![](images/survival-curve.png)
+:::
+
+::::
+
+## Censoring
+
+:::{.incremental}
+
+When the event of interest is not observed in the study period because: 
+
+1. The participant/subject has not experienced the event
+2. The participant exits the study 
+3. The participant experiences an alternate event that makes follow up impossible
+
+:::
+
+. . . 
+
+This type of censoring is called right-censoring (no time delayed event)
+
+## Censoring 
+
+![](images/survival-censoring.png)
+
+## Survival versus hazard functions
+
+Survival functions express the probability of the event *not* happening, whereas hazard functions express the probability of the event happening
+
+```{r, echo= FALSE}
+lung <- lung
+fit <- survfit(Surv(time, status) ~ sex, data = lung)
+plot1 <- ggsurvplot(fit, conf.int = TRUE,
+          risk.table.col = "strata", # Change risk table color by groups
+          linetype = "strata", # Change line type by groups
+          ggtheme = theme_bw(), # Change ggplot2 theme
+          palette = c("#E7B800", "#2E9FDF"))
+
+plot2 <- ggsurvplot(fit, conf.int = TRUE,
+          risk.table.col = "strata", # Change risk table color by groups
+          linetype = "strata", # Change line type by groups
+          ggtheme = theme_bw(), # Change ggplot2 theme
+          palette = c("#E7B800", "#2E9FDF"), 
+          fun = "event" )
+
+arrange_ggsurvplots(list(plot1, plot2))
+```
+## Survival function 
+
+Outputs the probability that survival time is greater than specified time *t*
+
+$S(t) = P(T>t)$
+
+![](images/survival-function.png)
+
+
+## Survival versus hazard functions
+
+**Hazard** - the instantaneous event rate at a particular time point *t*, or the probability of currence of the event at time point *t*
+
+. . . 
+
+<br> **Cumulative hazard** - the total hazard experienced up to time point *t*
+
+
+
+
+## Fitting survival functions
+
+:::{.incremental}
+
+Multiple different types of estimators that can be used: 
+
+1. Kaplan-Meier
+2. Cox Proportional Hazard
+3. Weibull
+4. Exponential 
+:::
+
+... and so on
+
+
+## Kaplan-Meier estimator
+
+To illustrate the survival function, we use the Kaplan-Meier curve:
+
+1. Step function, flat when no event occurs and drops vertically when there is a change in the survival function at time *t*
+2. Crosses in the line illustrate a censoring event
+
+
+## Kaplan-Meier estimator
+
+To illustrate the survival function, we use the Kaplan-Meier curve:
+
+```{r}
+plot1
+```
+
+
+## Estimating Kaplan-Meier by hand
+
+Survival probability calculated for each time point: $CumProd(1-\frac{N_e}{R})$ 
+
+<br> $N_e$ is the number of events at the time point and $R$ is the remaining number of subjects at the time point.
+
+<br> Mock data:
+```{r}
+survex <- data.frame(
+  subject = seq(1, 10, 1), 
+  time = c(3, 5, 7, 2, 18, 16, 2, 9, 16, 5), # how long followed
+  event = c(0, 1, 1, 1, 0, 1, 1, 1, 1, 0) #0 = censored, 1 = event 
+)
+
+```
+
+## Estimating the Kaplan-Meier by hand
+
+1. How many distinct event times? 
+
+```{r}
+summary <- survex %>% filter(event == 1) %>% distinct(time) %>% arrange(time)
+summary$time
+```
+
+. . . 
+
+```{r}
+table <- data.frame(
+  time_num = seq(1, 5, 1), 
+  time = summary$time
+)
+str(table)
+```
+
+## Estimating the Kaplan-Meier by hand
+
+2. How many events for each event time? 
+
+```{r}
+summary <- survex %>% filter(event == 1) %>% group_by(time) %>% count()
+summary$n
+```
+
+. . .
+
+```{r}
+table$num_events <- summary$n
+str(table)
+```
+
+## Estimating the Kaplan-Meier by hand
+
+3. How many individuals at risk at each time point? 
+
+```{r}
+summary <- survex %>% group_by(time) %>% count()
+summary$time
+summary$n
+```
+
+. . .
+
+```{r}
+table$num_risk <- c(10, 7, 5, 4, 3)
+str(table)
+```
+
+## Estimating the Kaplan-Meier by hand
+
+4. Calculate the probability of survival at each time point  
+
+$1-\frac{N_e}{N_r}$ where $N_e$ is the number of events and $N_r$ is the number at risk at each time point
+
+```{r}
+table <- table %>%
+  mutate(p_surv = round(1 - (num_events/num_risk), 2))
+
+table
+```
+
+## Estimating the Kaplan-Meier by hand
+
+5. Calculate the cumulative product (last step!)
+
+```{r}
+table <- table %>%
+  mutate(surv_func = round(cumprod(p_surv), 2))
+
+table
+```
+
+## Estimating the Kaplan-Meier by hand
+
+We can then also plot it: 
+
+```{r}
+ggplot(table, aes(x = time, y = surv_func))+geom_step(col = "salmon")+
+  theme_classic()+
+  labs(x = "Time", y = "Probability of survival")
+
+```
+
+
+## The Kaplan Meier in R
+
+Use the `survival` and `survminer` packages to fit survival curves and manipulate/ plot them
+
+```{r}
+km <- survfit( # specifies a kaplan-meier curve
+  Surv(time, event)~ 1, # defines survival function and fits intercept only model
+  data = survex)
+
+```
+
+```{r}
+ggsurvplot(km, conf.int = FALSE)
+```
+
+## The Kaplan-Meier in R 
+
+```{r}
+ggsurvplot(km, conf.int = FALSE,
+           surv.median.line = "hv")
+summary(km)$table["median"]
+```
+
+# Fitting and using the Kaplan Meier 
+
+## Usage of Kaplan-Meier curves
+
+Primarily used to plot data 
+
+<br> Can also be used to compare survivorship between groups 
+
+<br> Can use the curves to derive centiles for time to event
+
+## Fitting a Kaplan Meier curve with groups
+
+```{r}
+km <- survfit(Surv(time, status) ~ 1, #Surv(time, censor)
+              data = lung) 
+ggsurvplot(km)
+
+```
+
+## Fitting a Kaplan Meier curve with groups
+
+```{r}
+km <- survfit(Surv(time, status) ~ sex, #Surv(time, censor) by sex
+              data = lung) 
+ggsurvplot(km)
+
+```
+
+## Log-rank test for differences between groups
+
+H~0~: There is no difference in survivorship between the groups
+
+H~1~: There is a difference in survivorship between the groups
+
+```{r}
+survdiff(Surv(time, status) ~ sex, data = lung) 
+
+```
+## Calculating probability of survivorship 
+
+```{r}
+# one year survivorship, but can add different or multiple time points
+summary(survfit(Surv(time, status) ~ sex, data = lung), times = 365)
+
+```
+
+# Cox Proportional Hazard
+
+## Why Cox PH?
+
+Kaplan Meier curves are good for comparing survival between a few groups, but can't handle continuous variables well 
+
+
+<br> Cox PH is a regression model that can handle multiple predictors including continuous variables
+
+
+## About Cox PH 
+
+Cox PH models the hazard of an event happening at each time point - a negative coefficient means a delayed event 
+
+. . . 
+
+Cox PH is similar to a poisson/logistic model, but models log(hazard). Coefficients should be exponentiated and interpreted hazard ratios
+
+. . . 
+
+Cox PH models assumes that the hazard experienced over time across groups is proportional, and that the relationship between the predictors and log hazard is linear 
+
+
+## Fitting and interpreting Cox PH
+
+```{r}
+fit <- coxph(Surv(time, status)~sex, data=lung)
+fit
+```
+. . . 
+
+<br> coef = if $\beta$ < 0, then event is delayed (survival improved)
+
+. . . 
+
+exp(coef) = Hazard ratio, relative to baseline, being female results in 0.59 times the hazard of death (or a 40% reduction in hazard)
+
+## Fitting and interpreting Cox PH 
+
+```{r}
+summary(fit)
+```
+
+. . . 
+
+p-value: slightly different test, but equivalent to a log-rank test in the KM model, tests H~0~: $\beta = 0$
+
+
+## Fitting and interpreting Cox PH
+
+How does each variable affect hazard? 
+What is the interpretation for each variable?
+
+```{r}
+fit2 <- coxph(Surv(time, status)~factor(sex) + ph.ecog, data=lung)
+fit2
+```
+
+
+## Plotting Cox PH
+
+This function predict the model, then plots it automatically
+
+```{r}
+ggadjustedcurves(fit2, data = lung, variable = "sex")
+
+```
+
+## Plotting Cox PH
+
+For continuous variables, you have to do some of this yourself. 
+
+```{r}
+newdat <- expand.grid(
+  sex = c(1, 2),
+  ph.ecog = c(0, 3)
+)
+  
+rownames(newdat)<- letters[1:4]
+
+coxpred <- survfit(fit2, data = lung,
+                   newdata = newdat)
+
+```
+
+
+## Plotting Cox PH
+
+For continuous variables, you have to do some of this yourself. 
+
+```{r}
+str(coxpred)
+
+```
+
+## Plotting Cox PH
+
+Note that the strata column codes for the combination of variables 
+
+```{r}
+coxpred_df <- surv_summary(coxpred)
+head(coxpred_df)
+```
+
+## Plotting Cox PH
+
+Get the combinations of the variables into this dataframe:
+
+```{r}
+newdat$strata <- rownames(newdat)
+coxpred_df <- left_join(coxpred_df, newdat, by = "strata")%>%
+  mutate(sex = as.factor(sex), 
+         ph.ecog = as.factor(ph.ecog))
+head(coxpred_df)
+```   
+
+## Plotting Cox PH
+
+Finally ready to plot: 
+
+```{r}
+ggsurvplot_df(coxpred_df, linetype = "ph.ecog", color = "sex")
+```   
+
+## Strata in  Cox PH
+
+If the proportional hazard assumption is violated, you can attempt to work through it by stratifying your Cox PH model based on a categorical variable 
+
+<br> Doing so will repeat the analysis for each of the strata individually
+
+
+## Strata in  Cox PH
+
+Stratifying by sex: 
+
+```{r}
+fits1 <- coxph(Surv(time, status)~factor(sex) + ph.ecog, data=lung)
+fits2 <- coxph(Surv(time, status)~strata(sex) + ph.ecog, data=lung)
+```
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r, echo = FALSE}
+ggadjustedcurves(fits1, data = lung, variable = "sex")
+```
+
+:::
+
+:::{.column width="50%"}
+
+```{r, echo = FALSE, message= FALSE}
+ggadjustedcurves(fits2, data = lung)
+```
+
+:::
+
+::::
+
+
+
+# Your turn
+
+## Attributions 
+
+Materials drawn on to write this lecture include: 
+
+1. BIMS 8382 workshop on [survival analysis](https://bioconnector.github.io/workshops/r-survival.html)
+

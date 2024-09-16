@@ -1,0 +1,187 @@
+---
+title: "Exercise 2: Exploratory Data Visualization"
+author: "Answer key"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(table1)
+library(tidyverse)
+
+```
+
+Throughout this exercise, we will be working with the `gapminder` package, which contains the dataset `gapminder`. Go ahead and load both the package and the dataframe now.
+
+```{r}
+library(gapminder)
+gapminder <- gapminder
+```
+
+## 1. Gapminder
+
+Let's start by getting to know the data set. 
+
+Q1.1. How many observations does the dataset have? What is the unit of observation? And what variables seem to be in this dataset?
+Hint: you'll probably want to know both the structure of the dataset as well as visualize the first few rows
+
+*The dataset has 1704 observations (number of rows)*
+*The unit of observation is each country in each year*
+*Variables are: country, continent, year, life expectancy, population (seemingly in millions of ppl), and per capita GPD*
+
+*Note: because this is a built-in dataset with good documentation you can also run `?gapminder` to access the metadata*
+
+```{r}
+str(gapminder)
+head(gapminder)
+```
+
+Q1.2. Which years are present in the dataset, and how many entries for each year there are? 
+Hint: a frequency table is useful here!
+
+*The years are: `r unique(gapminder$year)` and there are 142 entries for each year, suggesting that there are no missing observations*
+
+```{r}
+table(gapminder$year)
+```
+
+Let's focus our efforts to learning about the most recent year of data available to us. Use `dplyr` to filter the dataset for years matching 2007, and save the resulting dataframe as `gap2`
+
+```{r}
+gap2 <- gapminder %>% 
+  filter(year == 2007)
+```
+
+Let's get some summary statistics for life expectancy, coded as the variable`lifeExp`, across all the countries included in the dataset
+
+Q1.3. What are the mean and standard deviation for life expectancy?
+
+```{r}
+mean(gap2$lifeExp)
+sd(gap2$lifeExp)
+```
+
+Q1.4. What are the median and interquartile ranges for life expectancy?
+
+```{r}
+median(gap2$lifeExp)
+IQR(gap2$lifeExp)    
+```
+
+Q1.5. Compare the mean and the median. Are they similar or somewhat different? Why might the mean and the median be similar or different? And, if they are different, can you guess whether outlying values are greater than or less than the mean?
+
+*They are slightly different. The median is larger than the mean (almost 5 where the median is almost 72, or `r round(5/72, digits = 2)`). Since the mean is more sensitive to outlying values, and it is being pulled towards lower values, this suggests that there are some countries with extremely low life expectancies compared to most other countries in 2007.*
+
+
+Q1.6. Let's check the distribution of the life expectancy variable. What kind of variable is life expectancy? Given this knowledge, what type of plot should you build?
+
+*Life expectancy is a continuous variable. Since this is just one variable we want to visualize, we should use a histogram*
+
+Q1.7. Build this plot. Start by specifying the data to be used, then specify which variables should appear. Lastly, specify the kind of visualization you want (aka the geometry)
+
+*Note: Here I have played with some of the plot settings. See how my plot differs from yours. You should especially note the `binwidth` argument. `ggplot2` will pick a default for you, but it is not always what you would have chosen yourself. Binwidth is always expressed in whatever the unit of your variable is - in this case, since we are talking about life expectancy, the unit is years. It might make sense to group into bins of unit size 1, 2, or 5, depending on what you want to show.* 
+
+```{r}
+
+ggplot(data = gap2, mapping = aes(x = lifeExp))+
+  geom_histogram(fill = "turquoise4", col = "black", binwidth = 2)+
+  theme_bw()+
+  labs(x = "Life expectancy", 
+       title = "Distribution of life expectancy in 2007 measured in 142 countries")
+  
+
+```
+
+Q1.8. Where your suspicions about the distribution of the life expectancy variable confirmed by the plot?
+
+*Yes, there are many countries whose life expectancy falls in the ~70-82 year range, with a significant number of countries whose life expectancies are much much lower, as low as in the 40s*
+
+
+## 2. Creating tables of summary statistics
+
+Let's say we wanted to summarize the distribution of several variables in the `gap2` dataframe across the `length(unique(gap2$continent))` continents in the dataframe. The variables we are interested in are life expectancy (`lifeExp`), population size (`pop`), and per capita GDP (`gdpPercap`). 
+
+Rather than subsetting the data frame for each continent, then summarizing each variable, and copying this information into a table, we can use the `table1` package to help us. 
+
+A helpful vignette (sort of like a tutorial) for `table1` is available [here](https://cran.r-project.org/web/packages/table1/vignettes/table1-examples.html). It is also linked on Brightspace.
+
+Q2.1. Using `table1` syntax, produce a preliminary table that summarizes one variable, `lifeExp` across the continents. You may need to copy and paste the code into the console - the Rmd preview function does not handle the resulting html table well (but it will print ok when you knit the document).
+
+```{r}
+table1(~ lifeExp | continent, data = gap2)
+```
+
+At first glance, this looks pretty good, and we're almost ready to build a full table, BUT: 
+
+  1. We'd like descriptive labels rather than variable names in the rows
+  2. We don't really need the overall column and would like to remove it. 
+  
+
+Q2.2. Use the `label()` function to assign descriptive labels to each of the variables
+
+*Note: I used `colnames(gap2)` in the console as I was working through this code to remind myself which columns exist in my dataset*
+
+```{r}
+label(gap2$lifeExp) <- "Life Expectancy" # change this too!
+label(gap2$pop) <- "Population"
+label(gap2$gdpPercap) <- "Per capita GDP" 
+```
+
+Q2.3. Use `table1` function to create a second version of the table that contains all three variables of interest, and removes the overall column. Hint: use the documentation and/or the vignette to learn how to do this!
+
+```{r}
+table1(~ lifeExp + pop + gdpPercap | continent, data = gap2, overall = FALSE) # code from the first try, go ahead and modify it.
+```
+
+
+# 3. Data visualization 
+
+Let's now go back to the full `gapminder()` dataset. Let's say we were now interested in trends in life expectancy over time in the different countries. Let's build a plot to visualize it! For ease of use, let's focus on one continent. 
+
+Q3.1. Filter gapminder for countries in the continent "Asia", and save this dataframe as `gap.a`
+
+```{r}
+gap.a <- filter(gapminder, continent == "Asia")
+
+```
+
+Q3.2. Build a plot that visualizes life expectancy (y-axis) over time (x-axis). Make sure to group observations by country using the color argument. Use a scattergram to begin with. Save it as `p1`. You may have to print `p1` in the console and select "Zoom" to visualize it properly. 
+
+```{r}
+p1 <- ggplot(data = gap.a, mapping = aes(x = year, y = lifeExp, color = country))+
+  geom_point()
+
+p1
+```
+
+It looks like the relationship between life expectancy and time is mostly positive linear. 
+
+Q3.3. let's add a smoothed line to the data. Use the geometry called "smooth". You can specify the method here ("loess" for LOESS, "lm" for a linear fit), and remove the grey standard error lines by adding the argument `se = FALSE`. Play around with the options here.
+
+```{r}
+p1+geom_smooth(method = "lm", se = FALSE) 
+p1+geom_smooth(method = "loess", se = FALSE) 
+```
+
+Q3.4. As it turns out, the plot is quite busy when we are using both points and smoothed lines by country. Go ahead and modify the code used to create the previous figure in order to have color grouping ONLY for the smoothed line. 
+
+HINT: the aesthetics mapping now moves from the data layer to the `geom` layer you want to group by color
+
+*Note: I am playing a bit more with the default settings here to make the plot less busy. Note the arguments I am specifying for the geom_point layer - what have they done?*
+
+```{r}
+ggplot(data = gap.a, mapping = aes(x = year, y = lifeExp))+
+  geom_point(alpha = 0.5, size = 0.7)+
+  geom_smooth(aes(color = country), method = "lm",se = FALSE)+
+  theme_classic()+
+  labs(x = "Year", 
+       y = "Life Expectancy", 
+       labs = "Country")
+
+```
+
+
+
+

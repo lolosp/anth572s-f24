@@ -1,0 +1,587 @@
+---
+title: "Relationships between variables 2"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+library(car)
+library(mlbench)
+grad <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+
+grad <- grad %>% 
+  mutate(rank = ifelse(rank == 1, 4, 
+                       ifelse(rank == 2, 3, 
+                              ifelse(rank == 3, 2, 1))))
+data("PimaIndiansDiabetes2", package = "mlbench")
+diabetes <- na.omit(PimaIndiansDiabetes2)
+diabetes <- diabetes %>% 
+  mutate(bp = ifelse(pressure <= 90, 0, 1), 
+         outcome = ifelse(diabetes == "neg", 0, 1))
+
+```
+
+# Term project
+
+## Goal of the project
+
+:::{.incremental}
+Give you experience:
+
+- Formulating research questions and hypotheses
+- Supporting/situating these questions with literature review
+- Testing your hypotheses with statistical tests
+- Reflecting on what your statistical results mean about your question of interest
+:::
+
+## How ?
+
+You will identify a dataset (Zenodo, other data repository, or I can help you with options)
+
+You will decide on a topic and come up with two specific questions/hypotheses
+
+You will test these hypotheses, write a report outlining your results, and present your findings in a research poster format
+
+
+## Project components 
+
+:::{.incremental}
+1. Pre-registration - 20% - due April 5th (note: pushed back)
+2. Report - 60% - due May 3rd
+3. Presentation - 20% - May 8th, due May 3rd
+:::
+
+## Pre-registration 
+
+Think of this as an analysis plan. You should include: 
+
+- Your topic and specific questions
+- A brief synthetic literature review (10-15 papers, not more than 1 page)
+- The dataset you will use (subset if applicable)
+- The tests you plan to use for each research question
+
+<br> Due April 5th
+
+## Synthetic literature review
+
+This does not have to be exhaustive, but in order to formulate a good research question, you must have some knowledge about your variables of interest and/or the study context 
+
+<br> You should cite 10-15 sources, and write no more than 500 words/1 page of literature review
+
+## Report sections
+
+:::{.incremental}
+1. Introduction 
+    - Lit review and RQs
+2. Research questions 1-2
+    - Data viz, descriptive stats, formal test, conclusion on your RQ
+3. Discussion/Conclusion
+    - What have you revealed about your topic?
+4. References cited
+:::
+
+## Formatting references
+
+You can use any reference formatting style, but it should be consistent across references and should provide all necessary information. 
+
+. . . 
+
+<br> Spake L. 2022. Article Title. *Journal Title* 3:400-411. DOI: doi.org/10.1002/doi.
+
+Spake L. 2022. *Book Title*. Publisher: City. 
+
+Spake L. 2002. Chapter Title. In: Spake L (ed). *Book Title*. Publisher: City. p.400-411.
+
+## Poster  
+
+Due May 3rd. Those posters coming in after that day may not get printed in time.
+
+. . . 
+
+See Brightspace for examples and resources. You can also see lots of example posters in the Anthropology hallways, downstairs and upstairs.
+
+
+
+# Questions?
+
+A PDF version of these guidelines will go up on Brightspace v soon.
+
+
+# Odds and odds ratios
+
+## Moving beyond continuously distributed outcomes
+
+
+
+## What are odds?
+
+Odds present the chance of an outcome. 
+
+<br> Where the probability of an event is given as the number of successes divided by the number of potential events, odds are typically presented as a ratio of success to non-successes.
+
+. . . 
+
+<br> Chance of rolling a 1 on a normal die:
+
+probability = 1/6 or `r 1/6`; 
+odds = 1/5 or `r 1/5`
+
+## What are odds? 
+
+It's always possible to convert between odds and probability. 
+
+. . . 
+
+<br> You can obtain the odds of an event from the probability with $prob = \frac{odds}{1+odds}$
+
+. . . 
+
+<br>In the dice rolling example, odds of rolling a 1 were 1/5. Therefore, $prob = \frac{1/5}{1+(1/5)}$ or `r (1/5)/(1+(1/5))`
+
+## What are odds? 
+
+It's always possible to convert between odds and probability. 
+
+. . . 
+
+<br> You can obtain the probability of an event from the odds with $odds = \frac{p}{1-p}$
+
+. . . 
+
+<br>In the dice rolling example, probability of rolling a 1 was 1/6. Therefore, $odds = \frac{1/6}{1-(1/6)}$ or `r (1/6)/(1-(1/6))`
+
+## Odds ratios
+
+Odds ratios (ORs) express how likely an outcome is in one group relative to another group. ORs are routinely used in epidemiology and health research.
+
+## Calculating odds ratios
+
+Let's say we have ~400 participants who participated in an epidemiological study of diabetes. For each participant we know whether or not they have elevated diastolic blood pressure, and whether or not they develop diabetes.
+
+. . . 
+
+![](images/OR-formula.jpeg)
+
+## Calculating odds ratios
+
+```{r}
+table(diabetes$bp, diabetes$outcome)
+```
+
+. . . 
+
+OR = (Yes/Yes * No/No)/(Yes/No * No/Yes)
+
+```{r}
+(258*7)/(4*123)
+```
+
+. . . 
+
+Interpretation: For individuals with elevated diastolic BP, the odds of developing diabetes are 3.67 times the odds for those without elevated diastolic BP, or a 267% increase in the odds
+
+
+## Conditions in which the OR can be calculated
+
+When you have a single categorical predictor, ideally with only two levels
+
+. . . 
+
+You can't use this formula to calculate an OR with a continuous predictor, or while controlling for the effect of other variables
+
+
+# Logistic regression 
+
+## Logistic regression
+
+Logistic regression is used when we have a binary outcome variable
+
+Examples: whether or not someone develops and illness, whether or not someone is employed
+
+. . . 
+
+Because our dependent variable is not continuous, we can't use linear regression 
+
+
+## Logistic regression 
+
+::::{.columns}
+
+:::{.column width="60%"}
+![](images/log-reg-plot.png){height=500}
+:::
+
+:::{.column width="40%"}
+
+The distribution of the outcome follows a sigmoid curve 
+
+The outcome is typically coded as did not happen (0) or did happen (1)
+:::
+
+::::
+
+## Motivating example 
+
+We are interested in the factors that predict admission to graduate school. We have a sample of 400 students, for whom we know the GPA, the GRE score, and the relative "prestige" of the undergraduate degree granting institution
+
+```{r}
+head(grad)
+```
+
+## Bivariate options
+
+If we only have one predictor, we could use a Chi square, but we wouldn't be able to quantify the relationship between the two variables and predict the likelihood of the outcome
+
+```{r}
+table(grad$admit, grad$rank)
+
+chisq.test(grad$admit, grad$rank)
+```
+
+## Logistic regression
+
+```{r}
+fit1 <- glm(admit ~ factor(rank), data = grad, family = binomial)
+summary(fit1)
+```
+
+## Under the hood of logistic regression 
+
+Logistic regression is no longer modeling our raw variables 
+
+It is in fact calculating the odds of the outcome, and modeling this instead of our raw values
+
+## Under the hood of logistic regression 
+
+Odds of the outcome over the range of the predictor
+
+![](images/odds-plot.png)
+
+## Under the hood of logistic regression 
+
+Log transformed odds of the outcome over the range of the predictor is roughly linear
+
+![](images/log-odds-plot.png)
+
+## Under the hood of logistic regression 
+
+Regression coefficients are on the log scale. $\beta<0$ is a negative association with the outcome, and $\beta>0$ is a positive association with the outcome 
+
+```{r}
+fit1$coefficients
+```
+
+## Converting back to the odds scale
+
+In order to get our coefficients back to the odds scale, we have to exponentiate (the opposite of taking the log)
+
+```{r}
+(log10 <- log(10))
+exp(log10)
+```
+
+. . . 
+
+When we exponentiate coefficients, we obtain what is called the odds ratio
+```{r}
+exp(coef(fit1))
+```
+
+## Interpreting the odds ratio
+
+The odds ratio expresses the increase (1+) or decrease (0-1) in the odds of the outcome given a one unit increase in the predictor
+
+For a rank 2 undergrad school, the odds of admission are 1.38 times the odds of admission for a rank 1 undergrad school. This is a 38% increase in the odds of admission
+
+```{r}
+exp(coef(fit1))
+```
+
+## Uncertainty in logistic regression 
+
+Mathematically it is not trivial to calculate an error term like we do in linear regression 
+
+. . . 
+
+Instead, we prefer to report error associated with the odds ratio
+
+```{r}
+exp(cbind(OR = coef(fit1), confint(fit1)))
+```
+
+## Logistic regression with multiple predictors
+
+In which direction are the effects of each of the predictors?
+
+Which are significantly associated with the outcome?
+
+```{r}
+fit2 <- glm(admit ~ gpa + gre +  factor(rank), 
+            data = grad, family = binomial)
+summary(fit2)$coefficients
+```
+
+## Logistic regression with multiple predictors
+
+What is the OR for GPA? How would you interpret this?
+
+```{r}
+exp(cbind(OR = coef(fit2), confint(fit2)))
+```
+
+
+## Prediction with logistic regression
+
+![](images/log-reg-fit.png)
+
+## Prediction with logistic regression
+
+To predict given values of the predictor:
+
+Bonus - can you guess the OR for student 2 versus student 1?
+
+```{r}
+newdata <- data.frame(gre = c(590, 590), gpa = c(3.0, 3.0), rank = c(1, 3))
+
+#predict odds
+newdata$pred.odd <- exp(predict(fit2, newdata))
+
+#predict probability
+newdata$pred.prob <- predict(fit2, newdata, type = "response")
+
+newdata
+```
+
+## Link functions: logit or probit?
+
+Logistic regression uses a link function in the background. 
+
+<br> Two link functions are available: logit or probit
+
+<br> For the most part they yield similar results, so generally it's recommended to use whichever is more commonly accepted in your field
+
+
+## Evaluating model fit
+
+We can't use R^2^ here, instead we can use the Akaike Information Criterion (AIC) 
+
+<br> The AIC is similar to the R^2^ in that it tells us about the fit of our model to the data. 
+
+<br> But, rather than express the variability captured by the model, it expresses the information in the data that is *not* captured by the model. 
+
+## Evaluating model fit
+
+The AIC also penalizes models for having more terms, something that inherently improves R^2^
+
+<br> Lastly, AIC can only be used to compare a group of models, not individual models
+
+. . . 
+
+<br>
+
+```{r}
+#| output-location: column
+fit1$aic
+```
+```{r}
+#| output-location: column
+fit2$aic
+```
+
+# Your turn
+
+# Statistical Control
+
+Or: How I learned to stop worrying and love uncertainty
+
+![](images/trangelove.jpeg){height=500}
+
+## Control, in observational designs 
+
+When we build multivariate models, we do so because we want to *control* for some variables that might influence the relationship between our main predictor of interest and our outcome
+
+
+## Control, in observational designs 
+
+If we were in an experimental set up, we could actually control these variables to isolate the impact of our variable of interest on the outcome
+
+. . . 
+
+In most anthropological settings, it is not feasible to run a controlled experimental study for one or more of several reasons
+
+. . . 
+
+<br> So, we try to replicate this control over "confounding" variables using statistics 
+
+## Controlling or adjusting for covariates or confound
+
+A *confounding variable* is an extraneous variable that affects the relationship between your predictor and your outcome. 
+
+. . . 
+
+<br>Confounding variables are also known as covariates
+
+. . . 
+
+<br>If these variables are not accounted for in your analysis, you could be obtaining the wrong results
+
+## Example 
+
+![](images/icecreamsharks.jpeg)
+
+Check out this blog for more [Spurious Correlations](https://www.tylervigen.com/spurious-correlations)
+
+## How do we choose confounders?
+
+:::{.incremental}
+Confounders are variables that: 
+
+1. Are *associated* with the exposure variable
+2. Are *causally* related to the outcome variable
+3. Are not on the causal pathway between the exposure and outcome variable
+:::
+
+
+## How do we adjust for confounders in our analyses?
+
+:::{.incremental}
+
+We have two options:
+
+1. We can stratify our analyses
+2. We can add the variable to our regression
+
+:::
+
+## Stratifying analyses
+
+:::{.incremental}
+- Repeat the analysis for different values of the confounder
+
+- Most useful when the confounder is categorical 
+
+- Most useful when there are few values of the confounder
+:::
+
+
+## Adding to regression 
+
+:::{.incremental}
+- Have seen this multiple times in our models already!
+
+- However, selecting appropriate control variables in observational settings is contentious
+
+- Over adding controls is just as bad as under adding
+:::
+
+
+# Statistical philosphy and control variables
+
+## Why do we use statistics?
+
+:::{.incremental}
+Three competing reasons for using statistics: 
+
+1. Description
+2. Prediction
+3. Causal inference
+:::
+
+## Description
+
+Purpose of the analysis is to summarize, describe, or visualize variables
+
+. . .
+
+<br> Less common (unfortunately) in anthropology
+
+. . . 
+
+<br> What happened? Who was affected? What was the occurrence of X across groups of people with Y?
+
+## Prediction
+
+Purpose is to find patterns, and often times to forecast 
+
+. . . 
+
+<br> Typically involves regression, classification methods 
+
+. . . 
+
+<br> What will happen? Are certain groups of X more likely to have Y?
+
+
+## Causal inference
+
+Purpose is to understand
+
+. . . 
+
+<br> Typically researchers want to understand the impact of a variable on another variable
+
+. . . 
+
+<br> If variable X changed, how would that impact variable Y?
+
+## What are we really doing when we "control" for different variables?
+
+![](images/vars-in-models.png)
+
+## Control and purpose of analysis 
+
+:::{.incremental}
+
+If we are interested in:
+
+- Description/prediction: we may build in more variables into our analysis in order to improve the fit of our model to the data 
+- Prediction: we may try to minimize the number of variables in our model to reduce the risk of overfitting
+- Causal inference: we throw this all out, open a whole new stack of textbooks, and formalize our knowledge of our study system with a DAG 
+
+:::
+
+## Or: How I learned to stop worrying and love uncertainty
+
+::::{.columns}
+
+:::{.column width="70%"}
+::: {.fragment}
+
+
+![](images/box-wrong.jpeg)
+:::
+:::
+
+:::{.column width="30%"}
+
+::: {.fragment}
+
+When we use statistics, we make choices on which tool to use.
+
+
+<br>There is no right or wrong choice (within reason). 
+::: 
+
+:::
+
+::::
+
+
+## Learn more 
+
+Peter Tennant's brilliant UKRN talk: [Introduction to Causal Inference and Directed Acyclic Graphs](https://www.youtube.com/watch?v=Ts0hnNBRIWg&t=36s&ab_channel=UKReproducibilityNetwork)
+
+Richard McElreath's brilliant Statistical Rethinking book and course: [Github landing page](https://github.com/rmcelreath/stat_rethinking_2022)
+
+## Attribution 
+
+- The logistic regression motivating example is inspired by [UCLA SMDA](https://stats.oarc.ucla.edu/r/dae/logit-regression/)
+- The odds and odds ratio example is inspired by [STHDA](http://www.sthda.com/english/articles/36-classification-methods-essentials/151-logistic-regression-essentials-in-r/) 

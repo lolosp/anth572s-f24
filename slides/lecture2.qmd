@@ -1,0 +1,829 @@
+---
+title: "Statistical basics and data visualization"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+---
+
+```{r setup}
+#| include: false
+
+library(tidyverse)
+library(palmerpenguins)
+library(ggdist)
+```
+
+## Brief review of last week 
+
+- You learned how to interact with R and RStudio
+- You learned about vectors 
+
+
+##
+
+::: callout-note
+## Learning objectives
+**At the end of this lesson you will:**
+
+-   Be able to use terminology that describes data and its components
+-   Explain why data visualization is important 
+-   Produce data visualizations
+-   Produce summary statistics
+:::
+
+
+```{r datasetup}
+#| include: false
+
+penguins <- penguins
+
+penguins <- penguins %>% 
+  mutate(size = ifelse(body_mass_g < 3550, "x-small", 
+                       ifelse(body_mass_g <4050, "small", 
+                              ifelse(body_mass_g <4750, "medium", 
+                                     "large"))))
+```
+
+## Penguins from `palmerpenguins`
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](images/penguins.png)
+:::
+
+::: {.column width="50%"}
+The dataset used to illustrate concepts today and through much of the course comes from the `palmerpenguins` library[^1], and records observations about penguins made from three islands in the Palmer archipelago in Antarctica.
+
+[^1]: Artwork by Allison Horst.
+
+:::
+
+::::
+
+
+## What does data look like?
+
+A *dataframe* is a data structure that shapes data into a 2 dimensional table of rows and columns
+
+The top row usually contains the names of the variables, and the data itself starts on the following row 
+
+
+```{r, echo = FALSE}
+
+head (penguins)
+
+```
+
+
+# Terminology to describe data
+
+## Within a dataframe 
+
+**Variable**: A quantity, quality, or property that can be measured (typically columns)
+
+**Observation**: A set of measurements made under similar conditions. Contains several values, each associated with a variable. 
+
+**Value**: The measurement that is recorded for a particular observation of a variable
+
+## Example
+
+In the `penguins` dataframe, what are some of the variables? Where would you find an observation? What is one example of a value?
+
+
+```{r, echo = F}
+head(penguins, 4)
+```
+
+## The concept of tidy data
+
+![](images/tidy-1.png)
+
+1. Each variable is a column
+2. Each observation is a row
+3. Each type of observational unit is a table/dataframe
+
+## Why you should record data in tidy formats
+
+- Easy to share with others 
+- Easy to manipulate
+- Easy to visualize and analyze 
+
+## Data wrangling
+
+**Data wrangling** is the process of both tidying data and pre-processing it (e.g. error checking, recoding) in order to make the analysis process easier.
+
+. . .
+
+We will spend some time dealing with this topic using `dplyr` next week. 
+
+
+# Dealing with variables 
+
+## A note about understanding variable types
+
+This is probably the most foundational concept in statistics, though it appears to be sometimes hard for students. 
+
+
+## Types of variables
+
+![](images/variable-types.png)
+
+## Numerical variables
+
+Variables whose values are numbers. They can be either:
+
+. . . 
+
+  - Continuous: a numerical value that can take an infinite number of real values given an interval. For example, height.
+
+. . . 
+
+  - Discrete: a numerical value that can only take a finite number of real values within a given interval. For example, a count of students in this class.
+  
+
+## Categorical variables 
+
+Variables whose values are characteristics that can't be measured by numbers. They can be either:
+
+. . . 
+
+  - Nominal: a categorical variable that describes a label or category without a natural order. For example, place of birth.
+
+. . . 
+
+  - Ordinal: a categorical variable that describes a label or category where there is a natural order between values. For example, educational achievement, or assessments of quality.
+  
+
+## A note on variable types
+
+```{r}
+#| include : false
+
+student <- c("A", "B", "C", "D", "E")
+assigned.group <- c(1, 1, 2, 3, 2)
+
+groups <- data.frame(student, assigned.group)
+```
+
+Be careful of variables coded with numbers! These can be categorical variables disguising as numerical variables.
+
+. . . 
+
+
+Take the following example dataframe: 
+
+
+```{r}
+head(groups)
+```
+
+## Recognizing different variable types
+
+Thess variable are from the `penguins` dataframe. Turn to your neighbour and discuss - what type of variable is each of these?
+
+. . . 
+
+```{r, echo = FALSE}
+penguins %>% 
+  slice(1, 41, 201, 281, 321)%>% 
+  select(species, year, sex, body_mass_g, size)%>% 
+  head()
+
+```
+
+::: aside
+Note: R's vector classifications are not the same as variable types!
+:::
+
+
+## Recognizing different variable types
+
+These variables are from the `ToothGrowth` dataframe. This is an experimental dataset that tests the effects of vitamin C supplementation delivered by two mechanisms on tooth length in guinea pigs. What type of variable is each of these?
+
+. . . 
+
+```{r, echo = FALSE}
+data("ToothGrowth")
+
+ToothGrowth %>% 
+  slice_sample(n = 6)%>% 
+  rename(length = len, delivery_type = supp) %>%
+  head()
+
+```
+
+::: aside
+Note: R's vector classifications are not the same as variable types!
+:::
+
+# Working with objects in R
+
+## How R works: Functions and arguments
+
+Any operation you perform in R takes place through the use of a function
+
+. . . 
+
+<br>
+A function takes the following form: <br> function(argument1, argument2, argument3)
+
+. . . 
+
+<br>
+You can learn about functions and the arguments they required by using the `?` in the console, or searching the Help tab of the viewer.
+
+## Functions and arguments
+
+:::: {.columns}
+
+::: {.column width="30%"}
+
+When you created vectors last week, you were actually using a function called `c()`
+
+:::
+
+::: {.column width="70%"}
+
+![](images/c-help.png)
+:::
+
+::::
+
+## Functions and arguments 
+
+Other examples of functions we have used so far: `str()`, `data.frame()`
+
+. . . 
+
+From now on we will be making extensive use of functions - remember that you can always look up "how they work" with the `?` call.
+
+
+# Working with objects in R
+
+## Types of objects in R
+
+::: {.incremental}
+We will be working with three main types of objects in R:
+
+1. Vectors
+2. Dataframes
+3. Models
+:::
+
+## Working with objects in R
+
+```{r}
+#| include: false
+vec1 <- 1:5
+vec2 <- c("A", "B", "C", "D")
+```
+
+How do we look at at vectors and learn their types? Let's say we have two vectors called `vec1` and `vec2`. We want to know what type of vectors they are. Let's start by printing them:
+
+. . . 
+
+```{r}
+vec1
+vec2
+```
+
+## Working with objects in R
+
+What type of vectors are they? We can use either the `typeof()` or `str()` functions to tell us:
+
+. . . 
+
+```{r}
+str(vec1)
+str(vec2)
+typeof(vec1)
+typeof(vec2)
+```
+
+## Converting between types of vectors
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+R handles 4 main types of vectors:
+
+  1. logical - `TRUE, FALSE`
+  2. integer - whole numbers
+  3. double/numeric - decimal numbers
+  4. character - most flexible type, alphanumeric
+
+::: 
+
+::: {.column width="40%"}
+
+![](images/vector-types.png)
+:::
+
+::::
+
+
+## Converting between vector types
+
+There are several functions for converting between types of vectors:
+
+  - `as.logical()`, can only take vectors of value 0, 1
+  - `as.integer()`, can only convert vectors and factors with whole number values
+  - `as.numeric()`, can take integer variables or logical vectors
+  - `as.character()`,  can take vectors logical, integer, or double
+
+## Converting between variable types
+
+`vec1` is of class integer. Let's say, however, that this variables really coding for some attribute that is measured in inches, and we want to be able to enter data that measured in half inch increments.
+
+. . . 
+
+We could convert the vector to a numeric variable with the `as.numeric()` function
+
+```{r}
+vec1numeric <- as.numeric(vec1)
+```
+
+## Converting between variable types
+
+In practice, R is pretty clever and will convert vectors when it needs to, so long as the vectors can be coerced to the new type. This is called implicit coercion.
+
+For example:
+
+. . . 
+
+```{r}
+typeof(vec1)
+vec3 <- vec1 + 1.5
+typeof(vec3)
+```
+
+## Converting between variable types
+
+`vec1` is of class integer. Let's say, however, that this vector actually codes for five different study groups. What type of variable would this be?
+
+. . . 
+
+We could convert it to a character vector:
+
+```{r}
+vec1char <- as.character(vec1)
+str(vec1char)
+```
+
+
+## A note on categorical vectors and factors
+
+Categorical vectors are best handled as factors. Factors are coded as integers, with corresponding "levels" coding for the name of the category.
+
+. . . 
+
+```{r}
+vec1factor <- as.factor(vec1)
+str(vec1factor)
+```
+
+## A note on categorical vectors and factors
+
+In practice, many functions will implicitly coerce character vectors into factors when needed. 
+
+However, you should know what a factor is in case you get an error that mentions factors!
+
+# Getting help writing code
+
+## Writing code is hard!
+
+Writing code is not the main aim of this course, so this week will be the last week we focus exclusively on coding
+
+. . . 
+
+New functions and packages will be introduced throughout the term, and I'll do my best to explain them thoroughly
+
+. . . 
+
+But, you will likely still need to refer to materials to complete your assignments throughout the term
+
+## Writing code is hard!
+
+:::{.incremental}
+Where to get help writing code:
+  
+  - Your peers 
+  - Your textbooks (R4DS, Data Visualization)
+  - Brightspace 
+  - Package documentation (?, online vignettes)
+  - Google (stackexchange, stackoverflow)
+  - ChatGPT and/or RTutor.ai
+  
+:::
+
+
+# Your turn: Exercise 2 in Posit Cloud
+
+# EDA part 1: Summary statistics 
+
+## Why produce summary statistics? 
+
+In short, because they help you understand your data.
+
+. . . 
+
+In practice, you'll often be comparing variables between groups - it helps to know from the get-go what the distribution of data between these groups looks like
+
+## What summary statistics to produce?
+
+::: [.incremental]
+Generally two types of statistics produced for :
+
+  1. Measures of central tendency
+  2. Measures of spread/dispersion
+
+:::
+
+## Measures of central tendency
+ 
+Measure the middle of the data - the trend you choose to measure is up to you:
+
+  1. Mean or average, calculated with `mean()`
+  2. Median, calculated with `median()`
+  3. Mode, no standard function in R
+
+## Measures of central tendency
+
+Choosing between the mean and the median will be based on the distribution of your data. 
+
+Median is more robust to outliers and/or extreme values, particularly with small sample sizes
+
+. . . 
+
+```{r}
+median(penguins$bill_length_mm, na.rm = TRUE)
+median(c(penguins$bill_length_mm, 105), na.rm = TRUE)
+mean(penguins$bill_length_mm, na.rm = TRUE)
+mean(c(penguins$bill_length_mm, 105), na.rm = TRUE)
+```
+
+## Measures of dispersion
+ 
+Measure the spread of the data - you have a lot more option here:
+
+  1. Range, min-max, calculated with `range()`
+  2. Variance, sum of squared deviations from mean divided by n, calculated with `var()`
+  3. Standard devation, sqrt(variance), calculated with `sd()`
+  3. Interquartile range, delta 75th-25th quartiles, calculated with `IQR()`
+  4. Coefficient of variation, sd/mean, calculated with `sd()/mean()`
+  
+## Measures of dispersion 
+
+There is no right or wrong choice here. Typically, you would report: 
+
+  - If presenting a mean, also report standard deviation
+  - If presenting a media, also report interquartile range
+  - Range is good to present for method development and testing
+  - If reporting multiple variables with very different scales, consider using coefficient of variation
+  
+## Summarizing categorical and/or ordinal variables
+
+Typically done with count and/or frequency tables, calculated with `table()` and `proportions()`
+
+```{r}
+table(penguins$species)
+proportions(table(penguins$species))
+```
+
+## Using these measures in practice
+
+Typically you would use these measures either quickly to get a sense for your data on the fly during analysis, 
+
+. . . 
+
+or you would be producing a summary statistics table either for analysis of multiple variables between groups or for publication
+
+. . . 
+
+We can create these larger tables using `table1()` function from the `table1` package.
+
+
+# Your turn: Exercise 2 - Section 1 and 2
+
+# EDA part 2: Data visualization with `ggplot2`
+
+## The data science pipeline 
+
+![](images/data-science-pipeline.png)
+
+The data science pipeline, Wickham and Grolemund (R4DS)
+
+## Why visualize data? 
+
+1. To better understand the shape of your data
+2. To check and confirm that your tests are reliable
+3. To communicate findings
+
+## Visualization to understand 
+
+Even people who are highly comfortable with numbers can be misled by summary statistics such as means, standard deviations, etc.
+
+. . . 
+
+Distribution of body size of penguins between females and males
+
+. . . 
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+:::{.fragment}
+
+```{r, echo = FALSE}
+summary(penguins$body_mass_g[penguins$sex == "female"])
+summary(penguins$body_mass_g[penguins$sex == "male"])
+```
+:::
+
+:::
+
+::: {.column width="40%"}
+
+:::{.fragment}
+```{r, echo = FALSE}
+ggplot(subset(penguins, sex %in% c("male", "female")), aes(x = sex, y = body_mass_g, fill = sex))+
+  geom_boxplot()
+```
+
+::: 
+
+::: 
+
+::::
+
+
+## Anscombe's quartet 
+
+```{r}
+#| include: false
+anscombe <- anscombe
+
+a1 <- anscombe %>%
+  pivot_longer(x1:x4, names_to = "set", values_to = "x")%>%
+  select(set, x)%>%
+  mutate(set = str_extract(set, pattern = "[1-9]"))%>%
+  arrange(set)
+
+a2 <- anscombe %>%
+  pivot_longer(y1:y4, names_to = "set", values_to = "y")%>%
+  select(set, y)%>%
+  mutate(set = str_extract(set, pattern = "[1-9]"))%>%
+  arrange(set)
+
+anscombe_long <- cbind(a1, a2)
+
+anscombe_long <- anscombe_long[,-3]
+```
+
+Anscombe's quartet is a famous illustration of why data visualization is so key when we are trying to understand our data or confirm our models. 
+
+. . . 
+
+<br>
+
+The quartet consists of four sets of data that when modeled with linear regression yield the same slope and the same R2 (a metric that quantifies goodness of fit).
+
+
+## Anscombe's quartet 
+
+The four similar linear regressions can be plotted: 
+
+. . . 
+
+```{r}
+ggplot(anscombe_long, aes(x = x, y = y))+
+  geom_smooth(method = "lm",  se = FALSE)+
+  facet_wrap(set~.)+ theme_bw()
+```
+
+## Anscombe's quartet 
+
+However, plotting the underlying data reveals a problem: 
+
+. . . 
+
+```{r}
+ggplot(anscombe_long, aes(x = x, y = y))+
+  geom_smooth(method = "lm", se = FALSE)+  geom_point()+
+  facet_wrap(set~.)+theme_bw()
+```
+
+## Anscombe's quartet
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+Anscombe's quartet is a reminder that although statistics are useful for summarizing data and conveying results, they can also be misleading if we are not careful.
+
+::: 
+
+::: {.column width="60%"}
+```{r, echo = FALSE}
+ggplot(anscombe_long, aes(x = x, y = y))+
+  geom_smooth(method = "lm", se = FALSE)+  geom_point()+
+  facet_wrap(set~.)+theme_bw()
+```
+:::
+
+::::
+
+## 
+
+::: callout-important
+## Choosing the correct visualization is important! 
+
+-   Effective visualizations support claims in easy to understand ways
+-   Strong skills in selecting and producing visualizations make analysis easier
+-   Some students struggle with this, but it is super important
+-   Selecting the appropriate visualization has to do with variable types
+-   Making good graphics takes practice
+
+:::
+
+
+## Types of data visualization 
+
+Appropriate data visualizations vary based on the type of variables that you are trying to display
+
+. . . 
+
+For a helpful cheatsheet on the types of plots you could use to display various types of data, see the "Cheatsheet" tab of Posit. I've uploaded this graphic to Brightspace as well. 
+
+. . . 
+
+The main visualization types we will use are: scatterplots, boxplots/violin plots, barplots, histograms, but there are lot of other options available to you.
+
+
+## Conceptualizing plots
+
+<br> Every plot needs an x and y axis, and you should know what you want to show in both axes
+
+<br> Many programming languages have defaults for some plots that mean you don't have to specify the y-axis for some types of plots
+
+## A reminder of the data structure
+
+```{r}
+head(penguins)
+```
+
+## Bar plots: a single discrete variable
+
+What is on the x axis? What is on the y axis?
+
+```{r, echo = FALSE}
+ggplot(penguins, aes(x = island, fill = island))+ 
+  geom_bar(width = 0.7)+
+  theme_minimal()+
+  scale_fill_manual(values = c("darkorange","darkorchid","cyan4"), 
+                    guide = "none")
+  
+```
+
+## Histograms: a single continuous variable
+
+What is on the x axis? What is on the y axis?
+
+```{r, echo = FALSE }
+ggplot(penguins, aes(x = flipper_length_mm))+ 
+  geom_histogram(binwidth = 5, fill = "cyan4")+
+  theme_minimal()
+  
+```
+
+
+## Scatterplots: two continuous variables
+
+What is on the x axis? What is on the y axis?
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()+
+  theme_classic()
+```
+
+## Scatterplots: two continuous variables
+
+We can add a third grouping variable by assigning an attribute to the points themselves, e.g. shape or color
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(col = species, shape = species))+
+  theme_classic()
+```
+
+
+## Box plots: one continuous and one discrete variable
+ 
+What is on the x axis? What is on the y axis?
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = species, y = body_mass_g)) +
+  geom_boxplot(aes(fill = species))+
+  theme_classic()
+```
+
+
+## Violin plots: improving on the box plot
+
+Violin plots show the density distribution of the underlying data
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = species, y = body_mass_g)) +
+  geom_violin(aes(fill = species))+
+  geom_boxplot(width = 0.3, alpha = 0.7)+
+  theme_classic()
+```
+
+## Raincloud plots: improving on the violin plot
+
+Raincloud plots show the density distribution of the underlying data and the underlying data itself!
+
+```{r, echo = FALSE}
+ggplot(data = penguins, aes(x = species, y = body_mass_g, fill = species, col = species)) +
+  stat_halfeye(adjust = 0.5, justification = -0.2, .width = 0, point_color = NA)+
+  geom_boxplot(width = 0.12, alpha = 0.7, outlier.color = NA, col = "black")+
+  stat_dots(side = "left",justification = 1.1, binwidth = 25)+
+  theme_classic()
+```
+
+## `ggplot2` - a grammar of graphics
+
+We're going to use the library `ggplot2` to do all of our plotting in this course. It is automatically loaded with the `tidyverse` package, so no need to specify it individually. 
+
+`ggplot2` is written following data visualization principles laid out in *The Grammar of Graphics* 
+
+What this means for you is that `ggplot2` and all its extensions use internally consistent syntax, and you only need to do a few things to get a great plot.
+
+## Building a plot through layering
+
+Steps to creating a plot using `ggplot2`:
+
+  1. Supply the data
+  2. Supply the aesthetics (which variables, which groups)
+  3. Specify the type(s) of visualization
+  4. Additional functions to modify and adjust the plot
+
+
+## Example
+
+Let's take the following plot, which shows the relationship between weight and bill size in the three species of penguins recorded in the `penguin` dataset:
+
+```{r}
+ggplot(data = penguins, mapping = aes(x = body_mass_g, y = bill_length_mm, color = species))+
+  geom_point()+
+  geom_smooth(method = "lm")
+```
+
+## Example
+
+```{r}
+p <- ggplot(data = penguins, mapping = aes(x = body_mass_g, y = bill_length_mm, color = species))
+p
+```
+
+## Example
+
+```{r}
+p <- ggplot(data = penguins, mapping = aes(x = body_mass_g, y = bill_length_mm, color = species))
+p + geom_point()
+```
+
+## Example
+
+```{r}
+p2 <- ggplot(data = penguins, mapping = aes(x = body_mass_g, y = bill_length_mm))
+p2 + geom_point(aes(color = species))+ geom_smooth(method = "lm")
+```
+
+## Commonly used geometries
+
+Here are the ones you most commonly will use:
+
+- Bar plots: `geom_bar()`, needs an x variable
+- Histograms: `geom_histogram()`, needs an x variable
+- Scatter plots: `geom_point()`, needs x and y variables
+- Box plots: `geom_boxplot()`, needs x and y variables
+
+You can endlessly customize your plots, refer to cheatsheets or to the cook book for help!
+
+# Your turn - Exercise 2, part 3
+
+
+
+

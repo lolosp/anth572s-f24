@@ -1,0 +1,400 @@
+---
+title: "Non-parametric alternatives for comparing groups"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+library(FSA)
+```
+
+## Today: 
+
+1. The Kruskal Wallis
+2. Chi Square
+
+
+# Kruskal Wallis 
+
+## Kruskal Wallis test for medians
+
+Alternative to the ANOVA when the samples do not meet the assumption of normality 
+
+. . . 
+
+<br>
+
+In logic and practice, it is very similar to the Mann Whitney U/Wilcoxon Rank Sum test but for multiple samples
+
+## Assumptions of the Kruskal Wallis
+
+It is only considered a test for differences in the medians between groups when the groups *have similar distributions* 
+
+. . . 
+
+These don't need to be normal, but they should be similarly shaped across the groups compared 
+
+
+## Assumptions of the Kruskal Wallis
+
+When the variable is not similarly distributed across groups, then the test just tells us about differences in the distributions between the groups
+
+In other words, if the similarity of distributions assumption is not met, then the test just tells us the likelihood that an observation in group 1 will be greater than an observation in group 2
+
+
+## The H~0~ and H~1~ 
+
+When the groups have similar distributions, 
+
+<br> H~0~: The median value for the groups do not differ
+<br> H~1~: The median value for the groups differ
+
+. . . 
+
+Note that when the groups are not similarly distributed, then the H~0~ is that the distribution of the variable does not differ across the groups
+
+
+## Running the test: scenario
+
+A researcher wants to know whether or not three drugs have different effects on back pain, so he recruits 30 individuals who all experience similar back pain and randomly splits them up into three groups to receive either Drug A, Drug B, or Drug C. After one month of taking the drug, the researcher asks each individual to rate their back pain on a scale of 1 to 100, with 100 indicating the most severe pain.
+
+```{r, include= FALSE}
+pain <- data.frame(drug = rep(c("A", "B", "C"), each = 10),
+                   pain = c(runif(10, 40, 60),
+                            runif(10, 45, 65),
+                            runif(10, 55, 70)))
+```
+
+## Running the test
+
+Here is the dataset. What are the score and grouping variables?
+
+```{r}
+str(pain)
+head(pain)
+```
+
+## Running the test
+
+```{r}
+kruskal.test(pain ~ drug, data = pain )
+
+```
+
+## Post-hoc test for the Kruskal Wallis 
+
+Just like the ANOVA, the output of the Kruskal Wallis test does not tell us which group differs from the others.
+
+The post-hoc test used for the KW is the Dunn test. 
+
+## The Dunn test
+
+The Dunn test is similar to the Tukey test, in that it adjust *p*-values for multiple comparisons.
+
+It is run with the `FSA::dunnTest` function. There are a lot of correction methods available, I suggest that you use either `"holm"` or `"bh"` rather than Bonferroni.
+
+```{r}
+dunnTest(pain ~ drug, data = pain )
+```
+
+## Plotting the outcome
+
+You can also use data visualization to help yourself understand the output of the Dunn Test:
+
+```{r}
+dunnTest(pain ~ drug, data = pain )
+```
+
+# Your turn: Posit Cloud
+
+# The Chi square
+
+## Flavors of Chi
+
+:::{.incremental}
+There are two types of Chi square:
+
+1. Chi square for goodness of fit (one sample)
+2. Chi square for independence (two sample)
+:::
+
+. . . 
+
+The goodness of fit Chi square is quite rare in practice, so we're going to focus on the Chi square for independence
+
+## Chi square for independence 
+
+:::{.incremental}
+Used when there are two categorical variables:
+
+  1. The first is typically a grouping variable
+  2. The second is typically a characteristic/other outcome
+  
+:::
+
+## An example
+
+We have three groups of patient who are presenting with anxiety. We administer three separate treatments: a control group, a talk therapy group, and a drug treatment.
+
+. . . 
+
+We administer the treatment for a month, then we ask participants to rate their anxiety levels as: low, medium, or high.
+
+. . .
+
+What are the variables for comparison in this example?
+
+
+## What do the data look like?
+
+```{r, include= FALSE}
+set.seed(123)
+patients <- data.frame(
+  treatment = sample(c("Control", "Talk", "Drug"), size = 1000, 
+                       prob = c(0.4, 0.3, 0.3 ), replace = TRUE), 
+  outcome = sample(c("Low", "Medium", "High"), size = 1000, 
+                     prob = c(0.2, 0.5, 0.3), replace = TRUE)
+)
+```
+
+```{r, eval = FALSE}
+
+# this was use to randomly 
+patients_def <- data.frame(
+  treatment = sample(c("Control", "Talk", "Drug"), size = 1000, 
+                       prob = c(0.4, 0.3, 0.3 ), replace = TRUE), 
+  outcome = sample(c("Low", "Medium", "High"), size = 1000, 
+                     prob = c(0.2, 0.5, 0.3), replace = TRUE)
+)
+
+```
+
+```{r}
+head(patients)
+```
+
+## The purpose of the Chi square
+
+We are interested in knowing whether the type of treatment administered is associated with the perceived level of anxiety. 
+
+. . . 
+
+Since these are categorical variables, we can't apply a t-test or an ANOVA. We can, however, apply the Chi square
+
+. . . 
+
+The question the Chi square can help us with: "Is there any difference in the distribution of one variable according to groups of the other variable?"
+
+
+## The H~0~ and H~1~ in Chi square for independence
+
+<br> H~0~: The distribution of the outcome is the same across groups
+
+. . . 
+
+<br> H~1~: The distribution of the outcome is not the same across groups
+
+## The logic of the Chi square
+
+To evaluate the H~0~, the Chi square takes a frequency table. 
+<br><br><br><br>
+
+. . . 
+
+```{r}
+table(patients$treatment, patients$outcome)
+```
+
+## The logic of the Chi square
+
+If the outcome is equally distributed between groups in the population (H~0~), then the proportions of each outcome should be approximately the same across the grouping variables
+
+```{r}
+table(patients$treatment, patients$outcome)
+```
+
+## The logic of the Chi square
+
+If the outcome is equally distributed between groups in the population (H~0~), then the proportions of each outcome should be approximately the same across the grouping variables
+
+```{r}
+proportions(table(patients$treatment, patients$outcome))*100
+```
+
+## Procedure underlying the Chi square test
+
+:::{.incremental}
+
+1. Determine the expected frequencies 
+2. Compare expected and observed frequencies (the test itself)
+
+:::
+
+## 1. Determining expected frequencies
+
+Expected frequency for each cell = (Row total * Column total)/ Overall N
+
+. . . 
+
+Expected frequency for control group, high anxiety cell: 
+
+```{r, echo = FALSE}
+table(patients$treatment, patients$outcome)
+```
+
+. . . 
+
+```{r}
+rowt <- 126+91+187
+colt <- 126+94+80
+totaln <- rowt + colt
+(expected <- (rowt*colt)/totaln)
+```
+
+## 2. Compare expected and observed frequencies
+
+![](images/chi_squared_test.png)
+
+Degrees of freedom for this test: 
+
+*df* = (N~cols~ - 1)*(N~rows~ - 1)
+
+## The Chi distribution 
+
+This is another example of a many-distributions scenario.
+
+<br> The distribution depends on the degrees of freedom (*df = (N~cols~ - 1) x (N~rows~ - 1)*) 
+
+![](images/Chisquare-dist.png)
+
+# Practical application of Chi square test
+
+## Practical tidbits we need 
+
+1. H~0~ and H~1~
+2. How to run the test
+3. Assumptions
+4. Post-hoc 
+
+## Example 
+
+We have three groups of patient who are presenting with anxiety. We administer three separate treatments: a control group, a talk therapy group, and a drug treatment, and ask participants to rate their anxiety levels as: low, medium, or high.
+
+```{r}
+head(patients)
+```
+
+## Null and alternate hypothesis
+
+<br> H~0~: There is no difference in the distribution of perceived anxiety ratings across the treatment groups 
+<br> H~1~: There is a difference in the distribution of perceived anxiety ratings across the treatment groups 
+
+## Running the test
+
+This is done with the `chisq.test()` function. This function takes a *frequency table*, NOT a raw dataframe.
+
+```{r}
+table.patients <- table(patients$treatment, patients$outcome)
+chi.patients <- chisq.test(table.patients)
+chi.patients
+```
+
+## Assumptions 
+
+:::{.incremental}
+1. Independence of observations in each cell 
+2. Expected frequencies of at least 5 per cell 
+:::
+
+## Assumptions 
+
+Checking for *expected frequencies* of at least 5 can be done manually before the test, or using R functions access the output of the Chi square test
+
+```{r}
+chi.patients$expected
+```
+
+*Note - Make sure to test for expected and not actual frequency
+
+## Post-hoc 
+
+Just like the ANOVA, the Chi square output tells us whether there is a difference between the groups, but it does not tell us where the differences are
+
+```{r}
+chi.patients
+```
+
+## Post-hoc 
+
+To get a sense for where the differences are, we can calculate the contribution of each cell to the total Chi square test statistic:
+
+contrib = (residual^2)/chi2
+
+. . .  
+
+We can then plot these residuals with correlation plots
+
+## Post-hoc
+
+Which group is contributing the most to the test statistic?
+
+```{r}
+library(corrplot)
+contrib.patient <- chi.patients$residuals^2/chi.patients$statistic
+corrplot(contrib.patient, is.cor = FALSE)
+```
+## Post-hoc
+
+Which group is contributing the most to the test statistic? And are there more or less than expected?
+
+::::{.columns}
+
+:::{.column width="50%"}
+```{r}
+chi.patients$observed
+```
+:::
+
+:::{.column width="50%"}
+
+```{r}
+chi.patients$expected
+```
+
+:::
+
+::::
+
+# Your turn: Posit Cloud
+
+# Quiz 
+
+## General info
+
+- Wednesday March 29th
+- During class 
+- Short answer and MC
+
+## Topics covered
+
+- No code
+- Selecting appropriate plots 
+- Measures of centrality and dispersion
+- Key definitions
+- Selecting appropriate tests 
+- Writing null/alternate hypotheses
+- Processes for hypothesis testing
+- Assumptions for major tests
+
+## Attribution
+
+- The patient observation score data is adapted from the [R Companion Handbook](https://rcompanion.org/handbook/F_08.html#:~:text=Post%2Dhoc%20tests,hoc%20testing%20can%20be%20conducted.)
+- The pain rating data is adapted from [Statology](https://www.statology.org/dunns-test-in-r/)

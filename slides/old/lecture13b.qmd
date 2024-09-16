@@ -1,0 +1,273 @@
+---
+title: "Short intro to power analysis"
+subtitle: "ANTH 200"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+    tbl-cap-location: bottom
+editor: source
+---
+
+## What is power?
+
+<br> *Power* is the probability of detecting an effect given that the effect is in fact there 
+
+
+<br> You can also think of it as the probability of rejecting the null hypothesis when it false
+
+## What is power?
+
+In a study of a drug we know to be effective in reducing cholesterol, we compare cholesterol measurements in a group taking the drug and a group taking a placebo 
+
+. . . 
+
+With power of 0.80, we would correctly reject the null in 80% of the studies we did
+
+. . .
+
+Note that this also means that 20% of the time, we would not detect an effect
+
+
+
+## Power in statistics
+
+Two different reasons to analyze power in statistics:
+
+1. To estimate sample size needed for a planned analysis
+2. To check how much power a certain analysis had/ will have
+
+
+## Power analysis for sample size
+
+<br>Very useful at the research planning stage
+
+<br> Knowing the size of the effect that we anticipate detecting or would like to detect, how many individuals or subject do we need to sample to have adequate power?
+
+
+## Power analysis for power
+
+<br>Can also be useful at the research planning stage, but less common 
+
+<br>If there is a limit on participant recruitment (budget, time, available pool) and given the effect size we anticipate finding, do we have sufficient enough power to invest in this study?
+
+
+## How is power calculated? 
+
+Four concepts inter-relate: 
+
+1. Power
+2. Effect size
+3. Sample size 
+4. Alpha (type 1 error tolerance)
+
+. . .
+
+If you know three, you can calculate the fourth
+
+## Power and effect size
+
+*Effect size* is a standardized measure of the strength of the relationship between two variables, or of differences between two means of groups 
+
+<br> Essentially take the difference between means of groups, standardized by the variation in the samples
+
+<br> The larger the effect size, the smaller the n needed to detect it at the same power
+
+
+## Power and effect size
+
+There are many ways to calculate effect size, and the methods vary across the different types of analyses
+
+. . . 
+
+:::{.incremental}
+
+In a power analysis, two main ways to set effect size:
+
+1. Gather data from preliminary work or published studies to gather effect sizes 
+2. Make a guess of anticipated effect size - small, medium, or large 
+
+:::
+
+## Power and sample size
+
+Sample size is not linearly related to power - past a certain point, adding more power requires dramatic increases in sample size 
+
+![](images/power-n.gif)
+
+
+## Power analysis in G*Power
+
+::::{.columns}
+
+:::{.column width="40%"}
+
+![](images/gpower-logo.png)
+G*Power, a piece of software dedicated to power analysis
+
+:::
+
+:::{.column width="60%"}
+
+![](images/G_Power_screenshot.png){height=500}
+
+:::
+
+::::
+
+
+## Power analysis for one sample t-tests
+
+:::{.incremental}
+
+Steps:
+
+1. Determine means under H~0~ and H~1~
+2. Determine anticipated effect size (calculation needed here!)
+3. Determine one or two-tailed direction of interest 
+
+:::
+
+## Power analysis for one sample t-tests
+
+We have a vector of test scores for biology students taking Biological Anthropology and want to test whether they differ from the average score for all students, which is 85. 
+
+. . . 
+
+1. Determine means under H~0~ and H~1~
+
+```{r}
+set.seed(1234)
+bio <- rnorm(15, mean = 90, sd = 5) # 
+mean(bio)
+```
+
+## Power analysis for one sample t-tests
+
+We have a vector of test scores for biology students taking Biological Anthropology and want to test whether they differ from the average score for all students, which is 85. 
+
+. . . 
+
+2. Determine anticipated effect size
+
+```{r}
+library(lsr)
+D <- cohensD(bio, mu = 85)
+D
+```
+
+## Power analysis for one sample t-tests
+
+We have a vector of test scores for biology students taking Biological Anthropology and want to test whether they differ from the average score for all students, which is 85. 
+
+. . . 
+
+3. Determine one or two-tailed direction of interest
+
+. . . 
+
+```{r}
+library(pwr)
+pwr.t.test(d = D, sig.level = 0.05, power = 0.80, type = "one.sample", alternative = "two.sided")
+```
+
+## Calculating Power 
+
+We can check how much power we lose/gain by not adding more individuals
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+```{r}
+pwr.t.test(d = D, sig.level = 0.05, 
+    n = 15, 
+    type = "one.sample", 
+    alternative = "two.sided")
+```
+
+:::
+
+
+:::{.column width="50%"}
+
+```{r}
+pwr.t.test(d = D, sig.level = 0.05, 
+    n = 20, 
+    type = "one.sample", 
+    alternative = "two.sided")
+```
+:::
+
+::::
+
+## Power analysis for two sample t-tests
+
+We are planning a study of two groups of babies, one whose mothers experienced food insufficiency during pregnancy and the other whose mothers did not. We want to know if this impacts growth at the age of 3 months. 
+
+. . . 
+
+1. Determine means under H~0~ and H~1~
+
+```{r}
+set.seed(1234)
+insuff <- rnorm(100, mean = 57, sd = 5) 
+noinsuff <- rnorm(100, mean = 60, sd = 5)
+vecmean <- c(mean(insuff), mean(noinsuff))
+vecmean
+```
+
+## Power analysis for two sample t-tests
+
+We are planning a study of two groups of babies, one whose mothers experienced food insufficiency during pregnancy and the other whose mothers did not. We want to know if this impacts growth at the age of 3 months. 
+
+. . . 
+
+2. Determine anticipated effect size
+
+```{r}
+D <- cohensD(insuff, noinsuff)
+D
+```
+
+## Note for cases when no raw data is available
+
+Often, raw data is not available from papers. You can get the information you need to calculate D if you have means and standard deviations from each group:
+
+$D = \frac{\bar{x}_1 - \bar{x}_2}{SD_p}$
+
+$SD_p = \sqrt{\frac{SD_1^2 + SD_2^2}{2}}$
+
+
+## Note for cases when no raw data is available
+
+```{r}
+mean1 <- mean(insuff)
+mean2 <- mean(noinsuff)
+sd1 <- sd(insuff)
+sd2 <- sd(noinsuff)
+
+sdp <- sqrt(((sd1^2+sd2^2)/2))
+d <- abs((mean1 - mean2)/sdp)
+d
+
+```
+
+## Power analysis for two sample t-tests
+
+We are planning a study of two groups of babies, one whose mothers experienced food insufficiency during pregnancy and the other whose mothers did not. We want to know if this impacts growth at the age of 3 months. 
+
+. . . 
+
+3. Determine one or two-tailed direction of interest
+
+. . . 
+
+```{r}
+pwr.t.test(d = D, sig.level = 0.05, power = 0.80, type = "two.sample", alternative = "two.sided")
+```
+
+# Your Turn

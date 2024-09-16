@@ -1,0 +1,254 @@
+---
+title: "Pivoting and joining datasets in R"
+subtitle: "ANTH 572S"
+author: "Laure Spake"
+format: 
+  revealjs:
+    slide-number: c/t
+    logo: images/bing-logo.png
+    theme: simple
+    echo: true
+editor: source
+--- 
+
+```{r, include = FALSE}
+library(tidyverse)
+library(openxlsx)
+```
+
+## Joins
+
+Joins are a way to make links between rows in one dataframe with rows in another dataframe.
+
+![](images/join-inner.png)
+
+## Joins
+
+There are different kinds of joins depending on what you want to do:
+
+-   `inner_join()` - keeps only rows that exist in both datasets
+-   `left_join()` - keeps all rows in the first dataset specified, does not keep rows in the second dataset that do not match the first dataset
+-   `right_join()` - same as left join, but now the second dataset is saved
+-   `full_join()` - keeps all rows from both datasets.
+
+## Dataset reminder
+
+In lecture, I introduced a dataset called "child" which is essentially a series of birth histories about different mothers.
+
+```{r, include = FALSE}
+child <- read.xlsx("data/child-loop-long.xlsx")
+```
+
+Here is what the dataset looked like, as a quick reminder:
+
+```{r, echo = TRUE}
+child %>% head(10)
+```
+
+## Joining
+
+Let's say we now wanted to merge some of the information derived from summarizing the `child` dataset into a data frame containing information about their moms.
+
+Let's simulate a dataset that contains the moms' identifier and their age (pulled from a normal distribution with mean 35 and sd 5)
+
+```{r}
+mom <- data.frame(id = unique(child$id),
+                  age = rnorm(length(child$id), 35, 5))
+
+head(mom)
+```
+
+## Joining
+
+First, let's create a dataframe that contains a few pieces of summary statistics
+
+```{r}
+child_sum <- child %>% 
+  filter(!is.na(age))%>%
+  group_by(id)%>%
+  summarize(n_kids = n(), 
+            age_eldest = max(age), 
+            age_youngest = min(age), 
+            age_median = median(age))
+
+head(child_sum)
+```
+
+## Joining
+
+Now, we can move the columns we want into the `mom` data frame with a command from the `join()` family:
+
+```{r}
+left_join(mom, child_sum, by = "id") %>% head()
+```
+
+## Joining
+
+We could also choose to merge all the information about moms and their kids with a `full_join()`:
+
+```{r}
+full_join(mom, child, by = "id") %>% head()
+```
+
+# Pivoting, summarizing, and joining
+
+## Dealing with untidy data
+
+Most datasets you'll deal with are not in tidy format either because:
+
+1.  People aren't familiar with concept of tidy data and have provided it to you in some other format
+2.  Data was organized to facilitate collection rather than analysis
+
+## Two common formatting problems
+
+Often times, a dataset will have one of these problems:
+
+1.  One variable is spread across multiple columns
+2.  One observation is spread across multiple rows
+
+. . .
+
+We can fix these problems with the `pivot()` family of functions.
+
+## wide versus long data formats
+
+![](images/wide-long-formats.png)
+
+## `pivot_longer()` and `pivot_wider()`
+
+These functions help us transform columns and rows to their opposite formats.
+
+. . .
+
+It's important to note that there isn't always a "right" format - for some operations, you may want a wider format and for others, you would prefer a longer format.
+
+. . .
+
+Generally though, we are aiming to wind up with a dataset that adheres to tidy data principles
+
+## Anthropological example
+
+Imagine you ran an online survey using Qualtrics, and you asked parents to list some information about each of their children. Qualtrics produces a dataset that looks like this:
+
+![](images/wide-example.png)
+
+## Anthropological example
+
+In order to do much with the data from Qualtrics, it needed to be reshaped to long format:
+
+![](images/long-example.png)
+
+## Pivoting longer
+
+```{r, include = FALSE}
+table4a <- table4a
+```
+
+`table4a` contains observations of a variable for three countries in two different years, but in a wide format:
+
+```{r}
+table4a
+```
+
+## Pivoting longer
+
+::: columns
+::: {.column width="60%"}
+In order to clear this data set up, we need to make it longer
+:::
+
+::: {.column width="40%"}
+![](images/pivot_wider_longer.gif)
+:::
+:::
+
+## Pivot longer
+
+![](images/pivot_longer_steps.gif)
+
+## Pivot longer
+
+Takes four arguments:
+
+-   The data
+-   *cols* = the names of the columns to pivot
+-   *names_to* = the name of the variable to contain old column names
+-   *values_to* = the name of the variables to contain new values
+
+```{r, results = FALSE}
+table4a %>% 
+  pivot_longer(cols = c("1999", "2000"), 
+               names_to = "year", values_to = "cases")
+
+```
+
+## Pivot longer
+
+::: columns
+::: {.column width="40%"}
+```{r}
+table4a
+
+```
+:::
+
+::: {.column width="60%"}
+```{r}
+table4a %>% 
+  pivot_longer(cols = c("1999", "2000"), 
+               names_to = "year", 
+               values_to = "cases")
+
+```
+:::
+:::
+
+## Pivot longer
+
+```{r}
+table4a %>% 
+  pivot_longer(c("1999", "2000"), names_to = "year", values_to = "cases")%>%
+  ggplot(aes(x = country, y = cases, fill = year))+
+  geom_bar(stat = "identity", position = "dodge")
+
+```
+
+## Pivot wider
+
+![](images/pivot_wider_graphic.png)
+
+## Pivot wider
+
+Takes three arguments:
+
+-   The data
+-   *names_from* = the name of the variable whose values become columns
+-   *values_to* = the name of the variables whose values will fill the new column variable
+
+## Pivot wider
+
+In this case, each observation is spread across two rows: one containing cases, and the other containing population.
+
+```{r}
+table2
+```
+
+## Pivot wider
+
+::: columns
+::: {.column width="60%"}
+```{r}
+table2
+```
+:::
+
+::: {.column width="40%"}
+```{r}
+table2 %>%
+    pivot_wider(names_from = type, 
+                values_from = count)
+```
+:::
+:::
+
+# Your turn: Posit exercises - summmary-join-pivot.Rmd
